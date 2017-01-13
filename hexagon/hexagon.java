@@ -6,6 +6,15 @@ public class hexagon {
   public static int NUM_PIECES = 7;
 
   public static void main(String[] args) {
+
+    int[] tmp = {3,1,5,6,2,4};
+    System.out.println(Arrays.toString(tmp));
+    System.out.println("Rotate, but don't save back into the same variable");
+    rotateOneToTopFace(tmp);
+    // tmp = rotateOneToTopFace(tmp);
+    System.out.println(Arrays.toString(tmp));
+    System.out.println("END OF TEST");
+
     Scanner stdin = new Scanner(System.in);
 
     // Get number of test cases
@@ -19,7 +28,7 @@ public class hexagon {
       int[][] pieces = new int[NUM_PIECES][NUM_SIDES];
       // Read in the digits of each piece
       for (int j = 0; j < NUM_PIECES; j++) {
-        System.out.printf("Piece #" + (j + 1) + ": ");
+        System.out.printf("Piece #" + (j) + ": ");
         for (int k = 0; k < NUM_SIDES; k++) {
           pieces[j][k] = stdin.nextInt();
           System.out.printf("%d ", pieces[j][k]);
@@ -27,6 +36,8 @@ public class hexagon {
         System.out.println();
       }
       System.out.println();
+
+      // SOLVE HERE
     }
   }
 
@@ -40,8 +51,38 @@ public class hexagon {
     return tmp;
   }
 
-  public static void solve(int[][] caseNumbers) {
-    // Pick the center piece, one out of the seven, and fix it into place
-    
+  public static void rotateOneToTopFace(int[] piece) {
+    // Continue to rotate the piece until 1 is placed at the top
+    while (piece[0] != 1) {
+
+      // Save the last face of the piece
+      int last = piece[piece.length - 1];
+
+      // Shift every face up by one until the last face
+      for (int i = piece.length - 2; i >= 0; i--)
+          piece[i + 1] = piece[i];
+
+      // Put the last piece into the first face
+      piece[0] = last;
+    }
+  }
+
+  public static void solve(int[][] pieces) {
+    // Pick the center piece, one out of the seven, and fix it into place.
+    // Do this for each piece.
+    for (int i = 0; i < pieces.length; i++) {
+      // Pick piece
+      int[] piece = pieces[i];
+
+      // Rotate it so that 1 is at the zeroth index (i.e., top of the hexagon)
+      rotateOneToTopFace(pieces[i]);
+
+
+      // Place piece down in center position
+
+
+
+    }
+
   }
 }
