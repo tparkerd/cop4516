@@ -36,12 +36,13 @@ public class passwords {
         sets[j] = setChars;
       }
 
-      // Populate the list of passwords
-      buildPasswords(sets, 0, new String());
-
       // Get rank of password
       rank = Integer.parseInt(stdin.nextLine());
 
+      // Populate the list of passwords
+      buildPasswords(sets, 0, new String());
+
+      // Display the requested password
       System.out.println(passwordList.get(rank - 1));
     }
   }
@@ -50,27 +51,23 @@ public class passwords {
   public static void buildPasswords(char[][] sets, int level, String str) {
     // Base case: if we already found the password at the requested rank,
     // stop solving for more passwords
-    if (passwordCount > rank)
-      return;
-
+    // if (passwordCount == rank) return;
 
     // Base case: all sets have been used, the string is created, add to
     // the master password list
-
     if (level >= sets.length) {
-      System.out.println(str);
       passwordList.add(str);
       passwordCount++;
       return;
     }
 
     // Given a valid level, make candidate prefixes using its children letters
-
     // Add each letter of the current set to create a candidate password
     int child = 0;
     while (child < sets[level].length) {
       buildPasswords(sets, level + 1, str + String.valueOf(sets[level][child]));
       child++;
     }
+
   }
 }
