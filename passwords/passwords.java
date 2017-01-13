@@ -1,4 +1,5 @@
-import java.util.*;
+import java.util.Scanner;
+import java.util.ArrayList;
 
 public class passwords {
   public static ArrayList<String> passwordList;
@@ -51,7 +52,7 @@ public class passwords {
   public static void buildPasswords(char[][] sets, int level, String str) {
     // Base case: if we already found the password at the requested rank,
     // stop solving for more passwords
-    // if (passwordCount == rank) return;
+    if (passwordCount == rank) return;
 
     // Base case: all sets have been used, the string is created, add to
     // the master password list
