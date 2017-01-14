@@ -5,6 +5,7 @@ public class hexagon {
   public static int NUM_SIDES = 6;
   public static int NUM_PIECES = 7;
   public static int[] candidateAnswer;
+  public static boolean[] usedPieces;
 
   public static void main(String[] args) {
     Scanner stdin = new Scanner(System.in);
@@ -15,7 +16,7 @@ public class hexagon {
 
     // For each test case...
     for (int i = 1; i <= n; i++) {
-
+      usedPieces = new boolean[7];
       int[][] pieces = new int[NUM_PIECES][NUM_SIDES];
       // Read in the digits of each piece
       for (int j = 0; j < NUM_PIECES; j++) {
@@ -30,14 +31,17 @@ public class hexagon {
       System.out.printf("\nCase " + i + ": \n");
 
       // Clean out order array
-      int[] order = new int[7];
+      int[] perm = new int[7];
       for (int j = 0; j < 7; j++)
-        order[j] = -1;
+        perm[j] = -1;
 
-      System.out.printf("Rotation\t\tValidation\t\tStatus\n\t");
+      // if(!solveRec(pieces, new boolean[7], 0, order))
+        // System.out.printf("No solution\n");
+        // solveRec(pieces, usedPieces, 0, order);
 
-      if(!solveRec(pieces, new boolean[7], 0, order))
-        System.out.printf("No solution\n");
+      // printPerm(new int[6], new boolean[6], 0);
+
+      solveRec(pieces, perm, new boolean[7], 0);
 
     }
   }
@@ -66,44 +70,36 @@ public class hexagon {
     int i;
     for (i = 0; i <= list.length - 1; i++)
       System.out.printf("%-2d", list[i]);
+    System.out.println();
   }
 
   // Validity Check Function
-  public static boolean isValid(int[][] pieces, int[] order) {
-    System.out.printf("\t\t");
-    printOrder(order);
-    System.out.printf("\t\t");
-
+  public static boolean isValid(int[][] pieces, int[] perm) {
     // Base case: two or fewer pieces placed is always be a valid case
     // Therefore, we start checking on the third placed piece
     // Validate every placed piece until it appears
     // all pieces were placed, or there is an empty position
-    for (int i = 2; (i < order.length) && (order[i] != -1); i++) {
+    for (int i = 1; (i < perm.length) && (perm[i] != -1); i++) {
 
       // Check if placed piece matches the center value's face
-      // Get piece out of the order, to find the values from pieces
+      // Get piece out of the perm, to find the values from pieces
       int faceCount = pieces[0].length;
-      int pieceIndex = order[i];
+      int pieceIndex = perm[i];
       int[] piece = pieces[pieceIndex];
       int newPieceCenterFace = piece[(pieceIndex + 2) % faceCount];
       int centerPieceFace = pieces[0][pieceIndex - 1];
 
-      // System.out.println("Check ROOT piece faces");
-      // System.out.printf("%d =?= %d\n", newPieceCenterFace, centerPieceFace);
       if (newPieceCenterFace != centerPieceFace)
         return false;
 
       // Check if shared face with previously placed piece are equal
       int newPiecePreviousFace = piece[(pieceIndex + 3) % faceCount];
       int previousPieceSharedFace = pieces[pieceIndex - 1][pieceIndex % faceCount];
-      // System.out.printf("pieces[%d][%d]\n", pieceIndex - 1, (pieceIndex % faceCount));
-      // System.out.println("Check shared piece faces");
-      // System.out.printf("%d =?= %d\n", newPiecePreviousFace, previousPieceSharedFace);
       if (newPiecePreviousFace != previousPieceSharedFace)
         return false;
 
       // Check the final piece if it has been placed
-      if (order[order.length - 1] != -1) {
+      if (perm[perm.length - 1] != -1) {
         // Last piece
         int lastPieceFinalFace = pieces[pieceIndex][(pieceIndex + 1) % faceCount];
         int secondPieceFinalFace = pieces[1][4];
@@ -112,63 +108,60 @@ public class hexagon {
           return false;
       }
     }
-
-
     return true;
   }
 
+  //
   // Recursive approach to solving the problem
+  //
   //  pieces: a list of the pieces
   //  used:   a list of used pieces (i.e., [T,F,F,T,F,F])
   //          Where the 1st and 4th pieces have been placed.
-  //  placed: A counter of how many pieces have been placed
+  //  k:      A counter of how many pieces have been placed
   //          This will start at zero, which will actually equate to the
   //          index of where the next piece should be placed. So make sure
   //          that this gets incremented on each call to place the next piece.
-  //  TODO(timp): order: I'm not quite sure how to use this yet, but I need
-  //                     something that will keep track of the partial solution
-  //                     until solved.
-  public static boolean solveRec(int[][] pieces, boolean[] used, int k, int[] perm) {
-    // Base case: all pieces placed, "k", we have a solution
+  //  perm:   The current permuation
+  //
+  public static void solveRec(int[][] pieces, int[] perm, boolean[] used, int k) {
+    if(!isValid(pieces, perm)) {
+      System.out.printf("Case %s invalid\n", Arrays.toString(perm));
+      return;
+    }
+
     if (k == perm.length) {
-      System.out.print("\t\t");
-      printOrder(perm);
-      System.out.printf("\t\t");
-      printOrder(perm);
-      System.out.println();
-      return true;
+      System.out.println(Arrays.toString(perm));
+      return;
     }
-
-    // Validate that the current candidate solution
-    if (!isValid(pieces, perm)) {
-      System.out.printf("!Invalid!\n");
-      return false;
-    }
-
-    System.out.printf("~Valid~\n");
-
-    // For each possible piece...
     for (int i = 0; i < perm.length; i++) {
-      if(!used[i]) {
+      if (!used[i]) {
         used[i] = true;
         perm[k] = i;
 
-        // Try rotating a given value to the top of the piece and then placing...
-        for (int v = 0; v < NUM_SIDES; v++) {
-          // If it's the first piece placed, don't rotate it
-          if (perm[1] == -1) {
-            System.out.printf("\t\t");
-            solveRec(pieces, used, k + 1, perm);
-          }
-          // Otherwise, rotate for try each of the six sides until something matches
-          else {
-            rotatePiece(pieces[v], v + 1, 0);
-            solveRec(pieces, used, k + 1, perm);
-          }
+        // Rotate each one
+        for (int j = 0; j < NUM_SIDES; j++) {
+          rotatePiece(pieces[i], j + 1, 0);
+          solveRec(pieces, perm, used, k + 1);
         }
+        used[i] = false;
+
+      }
+    }
+  }
+
+
+  public static void printPerm(int[] perm, boolean[] used, int k) {
+    if (k == perm.length) {
+      System.out.println(Arrays.toString(perm));
+      return;
+    }
+    for (int i = 0; i < perm.length; i++) {
+      if (!used[i]) {
+        used[i] = true;
+        perm[k] = i;
+        printPerm(perm, used, k + 1);
         used[i] = false;
       }
     }
-    return false;
   }
 }
