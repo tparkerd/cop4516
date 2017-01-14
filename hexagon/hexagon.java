@@ -4,10 +4,6 @@ import java.util.*;
 public class hexagon {
   public static int NUM_SIDES = 6;
   public static int NUM_PIECES = 7;
-  public static enum Position {
-    north, northeast, southeast, south, southwest, northwest
-  }
-  public static boolean[] usedPieces;
   public static int[] candidateAnswer;
 
   public static void main(String[] args) {
@@ -19,24 +15,30 @@ public class hexagon {
 
     // For each test case...
     for (int i = 1; i <= n; i++) {
-      System.out.printf("Case " + i + ": ");
-      usedPieces = new boolean[7];
-      System.out.println(Arrays.toString(usedPieces));
 
       int[][] pieces = new int[NUM_PIECES][NUM_SIDES];
       // Read in the digits of each piece
       for (int j = 0; j < NUM_PIECES; j++) {
-        System.out.printf("Piece #" + (j) + ": ");
+        // System.out.printf("Piece #" + (j) + ": ");
         for (int k = 0; k < NUM_SIDES; k++) {
           pieces[j][k] = stdin.nextInt();
-          System.out.printf("%d ", pieces[j][k]);
+          // System.out.printf("%d ", pieces[j][k]);
         }
-        System.out.println();
+        // System.out.println();
       }
-      System.out.println();
 
-      // SOLVE HERE
-      solveRec(pieces, new boolean[7], 0, new int[7]);
+      System.out.printf("\nCase " + i + ": \n");
+
+      // Clean out order array
+      int[] order = new int[7];
+      for (int j = 0; j < 7; j++)
+        order[j] = -1;
+      if(!solveRec(pieces, new boolean[7], 0, order))
+        System.out.printf("No solution\n");
+
+      System.out.println("_____________________");
+      System.out.println();
+      System.out.println();
     }
   }
 
@@ -69,6 +71,15 @@ public class hexagon {
 
   // Validity Check Function
   public static boolean isValid(int[][] pieces, int[] order) {
+    System.out.println("Validating... " + Arrays.toString(order));
+
+    // Base case: two or fewer pieces placed is always be a valid case
+    // Therefore, we start checking on the third placed piece
+    // Validate every placed piece until it appears
+    // all pieces were placed, or there is an empty position
+    for (int i = 2; (i < order.length) && (order[i] != -1); i++) {
+
+    }
 
     return true;
   }
@@ -84,47 +95,49 @@ public class hexagon {
   //  TODO(timp): order: I'm not quite sure how to use this yet, but I need
   //                     something that will keep track of the partial solution
   //                     until solved.
-  public static void solveRec(int[][] pieces, boolean[] used, int placed, int[] order) {
+  public static boolean solveRec(int[][] pieces, boolean[] used, int placed, int[] order) {
     // Base case: all pieces placed, we have a solution
     if (placed >= NUM_PIECES) {
       printOrder(order);
-      return;
+      return true;
     }
 
-    // While there is an unused piece
-    int i = 0;
-    while (used[i]) {
-      // Piece the next available piece and place it, continue on...
+    // Check if each piece is unused
+    for (int i = 0; i < used.length; i++) {
 
-      // Check if the placement is valid
-      if (isValid(pieces, order))
-        solveRec(pieces, used, placed + 1, order);
-      else {
-        System.out.println("No solution.");
-        return;
+      // If at least 5 are available, pick the next available piece
+      // the charge
+      if (placed < 2) {
+
+        // If it's the starting piece, rotate one to the north face
+        if (placed == 0)
+          rotatePiece(pieces[i], 1, 0);
+        // Otherwise, place the second piece, and rotate it so that
+        // the south face is a one
+        else
+          rotatePiece(pieces[i], pieces[i - 1][0], 3);
+
+        // Mark it as used
+        used[i] = true;
+
+        // Remember where it's placed and move to the next position
+        order[placed++] = i;
+
+      } else if (!used[i]) {
+        // Pick it, and rotate it so that it has the correct value at the
+        // correct face
+
+        // Place it at the next available position
+        order[placed] = i;
+
+        if(!isValid(pieces, order)) // WHERE THE BACKTRACKING
+          return false;
+
+        // It's now used
+        used[i] = true;
+        return solveRec(pieces, used, placed + 1, order);
       }
-
-      i++;
     }
-
-
-    //
-    // for (i = 0; i < pieces.length; i++) {
-    //   // Pick piece
-    //   int[] piece = pieces[i];
-    //
-    //   // Rotate it so that 1 is on the northern face (i.e., top of the hexagon)
-    //   rotatePiece(pieces[i], 1, Position.north.ordinal());
-    //   System.out.println("Piece #" + i + " rotated: " + Arrays.toString(pieces[i]));
-    //
-    //   // Mark the current starting piece as used
-    //   usedPieces[i] = true;
-    //   System.out.println(Arrays.toString(usedPieces));
-    //
-    //
-    //   // Place piece down in center position
-    //
+    return false;
   }
-
-
 }
