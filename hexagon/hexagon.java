@@ -19,12 +19,12 @@ public class hexagon {
       int[][] pieces = new int[NUM_PIECES][NUM_SIDES];
       // Read in the digits of each piece
       for (int j = 0; j < NUM_PIECES; j++) {
-        // System.out.printf("Piece #" + (j) + ": ");
+        System.out.printf("Piece #" + (j) + ": ");
         for (int k = 0; k < NUM_SIDES; k++) {
           pieces[j][k] = stdin.nextInt();
-          // System.out.printf("%d ", pieces[j][k]);
+          System.out.printf("%d ", pieces[j][k]);
         }
-        // System.out.println();
+        System.out.println();
       }
 
       System.out.printf("\nCase " + i + ": \n");
@@ -79,7 +79,39 @@ public class hexagon {
     // all pieces were placed, or there is an empty position
     for (int i = 2; (i < order.length) && (order[i] != -1); i++) {
 
+      // Check if placed piece matches the center value's face
+      // Get piece out of the order, to find the values from pieces
+      int faceCount = pieces[0].length;
+      int pieceIndex = order[i];
+      int[] piece = pieces[pieceIndex];
+      int newPieceCenterFace = piece[(pieceIndex + 2) % faceCount];
+      int centerPieceFace = pieces[0][pieceIndex - 1];
+
+      System.out.println("Check ROOT piece faces");
+      System.out.printf("%d =?= %d\n", newPieceCenterFace, centerPieceFace);
+      if (newPieceCenterFace != centerPieceFace)
+        return false;
+
+      // Check if shared face with previously placed piece are equal
+      int newPiecePreviousFace = piece[(pieceIndex + 3) % faceCount];
+      int previousPieceSharedFace = pieces[pieceIndex - 1][pieceIndex % faceCount];
+      System.out.printf("pieces[%d][%d]\n", pieceIndex - 1, (pieceIndex % faceCount));
+      System.out.println("Check shared piece faces");
+      System.out.printf("%d =?= %d\n", newPiecePreviousFace, previousPieceSharedFace);
+      if (newPiecePreviousFace != previousPieceSharedFace)
+        return false;
+
+      // Check the final piece if it has been placed
+      if (order[order.length - 1] != -1) {
+        // Last piece
+        int lastPieceFinalFace = pieces[pieceIndex][(pieceIndex + 1) % faceCount];
+        int secondPieceFinalFace = pieces[1][4];
+
+        if (lastPieceFinalFace != secondPieceFinalFace)
+          return false;
+      }
     }
+
 
     return true;
   }
@@ -123,6 +155,9 @@ public class hexagon {
         // Remember where it's placed and move to the next position
         order[placed++] = i;
 
+      // Otherwise, it's one of the last five pieces to be placed. These need
+      // to be validated as they are placed and backtracking needs to be used
+      // to save on time and energy
       } else if (!used[i]) {
         // Pick it, and rotate it so that it has the correct value at the
         // correct face
