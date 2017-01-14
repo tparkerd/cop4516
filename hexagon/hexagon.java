@@ -4,18 +4,12 @@ import java.util.*;
 public class hexagon {
   public static int NUM_SIDES = 6;
   public static int NUM_PIECES = 7;
+  public static boolean[] usedPieces;
+  public static int[] candidateAnswer;
 
   public static void main(String[] args) {
-
-    int[] tmp = {3,1,5,6,2,4};
-    System.out.println(Arrays.toString(tmp));
-    System.out.println("Rotate, but don't save back into the same variable");
-    rotateOneToTopFace(tmp);
-    // tmp = rotateOneToTopFace(tmp);
-    System.out.println(Arrays.toString(tmp));
-    System.out.println("END OF TEST");
-
     Scanner stdin = new Scanner(System.in);
+
 
     // Get number of test cases
     int n = stdin.nextInt();
@@ -24,6 +18,8 @@ public class hexagon {
     // For each test case...
     for (int i = 1; i <= n; i++) {
       System.out.println("Case " + i + ": ");
+      usedPieces = new boolean[7];
+      System.out.println(Arrays.toString(usedPieces));
 
       int[][] pieces = new int[NUM_PIECES][NUM_SIDES];
       // Read in the digits of each piece
@@ -38,6 +34,7 @@ public class hexagon {
       System.out.println();
 
       // SOLVE HERE
+      solve(pieces);
     }
   }
 
@@ -76,6 +73,11 @@ public class hexagon {
 
       // Rotate it so that 1 is at the zeroth index (i.e., top of the hexagon)
       rotateOneToTopFace(pieces[i]);
+      System.out.println("Piece #" + i + " rotated: " + Arrays.toString(pieces[i]));
+
+      //
+      usedPieces[i] = true;
+      System.out.println(Arrays.toString(usedPieces));
 
 
       // Place piece down in center position
