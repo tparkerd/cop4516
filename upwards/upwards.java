@@ -16,7 +16,6 @@ public class upwards {
         System.out.println("YES");
       else
         System.out.println("NO");
-
     }
   }
 
@@ -29,7 +28,4 @@ public class upwards {
     }
     return true;
   }
-
-
-
 }
