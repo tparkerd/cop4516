@@ -60,6 +60,7 @@ public class hexagon {
       // Put the last piece into the first face
       piece[0] = last;
     }
+    System.out.println("Rotated: " + Arrays.toString(piece));
   }
 
   public static void printOrder(int[] list) {
@@ -71,7 +72,7 @@ public class hexagon {
 
   // Validity Check Function
   public static boolean isValid(int[][] pieces, int[] order) {
-    System.out.println("Validating... " + Arrays.toString(order));
+    System.out.println("Validating: " + Arrays.toString(order));
 
     // Base case: two or fewer pieces placed is always be a valid case
     // Therefore, we start checking on the third placed piece
@@ -127,50 +128,33 @@ public class hexagon {
   //  TODO(timp): order: I'm not quite sure how to use this yet, but I need
   //                     something that will keep track of the partial solution
   //                     until solved.
-  public static boolean solveRec(int[][] pieces, boolean[] used, int placed, int[] order) {
-    // Base case: all pieces placed, we have a solution
-    if (placed >= NUM_PIECES) {
-      printOrder(order);
+  public static boolean solveRec(int[][] pieces, boolean[] used, int k, int[] perm) {
+    System.out.printf("Permuation: ");
+    System.out.println(Arrays.toString(perm));
+
+    // Base case: all pieces placed, "k", we have a solution
+    if (k >= NUM_PIECES) {
+      printOrder(perm);
+      System.out.println("SOLUTION");
       return true;
     }
 
-    // Check if each piece is unused
-    for (int i = 0; i < used.length; i++) {
 
-      // If at least 5 are available, pick the next available piece
-      // the charge
-      if (placed < 2) {
+    // Validate that the current candidate solution
+    if (!isValid(pieces, perm))
+      return false;
 
-        // If it's the starting piece, rotate one to the north face
-        if (placed == 0)
-          rotatePiece(pieces[i], 1, 0);
-        // Otherwise, place the second piece, and rotate it so that
-        // the south face is a one
-        else
-          rotatePiece(pieces[i], pieces[i - 1][0], 3);
-
-        // Mark it as used
+    // For each possible piece...
+    for (int i = 0; i < perm.length; i++) {
+      if(!used[i]) {
         used[i] = true;
+        perm[k] = i;
 
-        // Remember where it's placed and move to the next position
-        order[placed++] = i;
-
-      // Otherwise, it's one of the last five pieces to be placed. These need
-      // to be validated as they are placed and backtracking needs to be used
-      // to save on time and energy
-      } else if (!used[i]) {
-        // Pick it, and rotate it so that it has the correct value at the
-        // correct face
-
-        // Place it at the next available position
-        order[placed] = i;
-
-        if(!isValid(pieces, order)) // WHERE THE BACKTRACKING
-          return false;
-
-        // It's now used
-        used[i] = true;
-        return solveRec(pieces, used, placed + 1, order);
+        // Try rotating the piece...
+        for (int angleRotation = 0; angleRotation < NUM_SIDES; angleRotation++) {
+          // rotatePiece(pieces[i], 1, face);
+          return solveRec(pieces, used, k + 1, perm);
+        }
       }
     }
     return false;
