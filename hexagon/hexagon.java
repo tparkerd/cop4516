@@ -2,6 +2,17 @@
 
 
 public class hexagon {
+
+  public static final String ANSI_RESET = "\u001B[0m";
+  public static final String ANSI_BLACK = "\u001B[30m";
+  public static final String ANSI_RED = "\u001B[31m";
+  public static final String ANSI_GREEN = "\u001B[32m";
+  public static final String ANSI_YELLOW = "\u001B[33m";
+  public static final String ANSI_BLUE = "\u001B[34m";
+  public static final String ANSI_PURPLE = "\u001B[35m";
+  public static final String ANSI_CYAN = "\u001B[36m";
+  public static final String ANSI_WHITE = "\u001B[37m";
+
   public static int NUM_SIDES = 6;
   public static int NUM_PIECES = 7;
   public static int[] candidateAnswer;
@@ -67,29 +78,32 @@ public class hexagon {
       int newPieceCenterFace = piece[(pieceIndex + 2) % faceCount];
       int centerPieceFace = pieces[0][(pieceIndex + 3) % faceCount];
 
-      System.out.println("Check ROOT piece faces");
-       System.out.printf("%d =?= %d\n", newPieceCenterFace, centerPieceFace);
+      System.out.printf("p[%d][%d] ===  p[%d][%d]\n", 0, (pieceIndex + 3) % faceCount, pieceIndex, (pieceIndex + 2) % faceCount);
+      System.out.printf("Cen[%d]   ===  New[%d]\n", (pieceIndex + 3) % faceCount, (pieceIndex + 2) % faceCount );
+      System.out.printf("  %d      ===  %d", centerPieceFace, newPieceCenterFace);
+
+      // System.out.println("Check ROOT piece faces");
+      // System.out.printf("%d =?= %d\n", newPieceCenterFace, centerPieceFace);
 
       if (newPieceCenterFace != centerPieceFace) {
-        System.out.println("CENTER match invalid");
-        return false;
+        System.out.printf(ANSI_RED + "\t\u2715\n" + ANSI_RESET);
+        // return false;
       } else {
-        System.out.println("CENTER matched");
+        System.out.printf(ANSI_GREEN + "\t\u2713\n" + ANSI_RESET);
       }
 
       // Check if shared face with previously placed piece are equal
       int newPiecePreviousFace = piece[(pieceIndex + 3) % faceCount];
       int previousPieceSharedFace = pieces[pieceIndex - 1][pieceIndex % faceCount];
 
-      System.out.printf("pieces[%d][%d]\n", pieceIndex - 1, (pieceIndex % faceCount));
-      System.out.println("Check shared piece faces");
-      System.out.printf("%d =?= %d\n", newPiecePreviousFace, previousPieceSharedFace);
+      System.out.printf("Pre[%d] === New[%d]\n", pieceIndex % faceCount, (pieceIndex + 3) % faceCount );
+      System.out.printf("  %d    ===  %d", previousPieceSharedFace, newPiecePreviousFace);
 
       if (newPiecePreviousFace != previousPieceSharedFace) {
-        System.out.println("SHARED match invalid");
-        return false;
+        System.out.printf(ANSI_RED + "\t\u2715\n" + ANSI_RESET);
+        // return false;
       } else {
-        System.out.println("SHARED matched");
+        System.out.printf(ANSI_GREEN + "\t\u2713\n" + ANSI_RESET);
       }
 
       // Check the final piece if it has been placed
@@ -120,12 +134,12 @@ public class hexagon {
   public static void solveRec(int[][] pieces, int[] perm, boolean[] used, int k) {
     // System.out.print("[");
     // printOrder(perm);
-    System.out.print("PERM");
-    System.out.println(Arrays.toString(perm));
+    System.out.print(ANSI_YELLOW + "~Permutation~\t");
+    System.out.println(Arrays.toString(perm) + ANSI_RESET);
     if(!isValid(pieces, perm)) return;
 
     if (k == perm.length) {
-      System.out.println("SOLUTIONSOLUTIONSOLUTIONSOLUTION");
+      System.out.println(ANSI_CYAN + "SOLUTION FOUND" + ANSI_RESET);
       System.out.println(Arrays.toString(perm));
       return;
     }
@@ -138,13 +152,29 @@ public class hexagon {
         // Rotate each one
         for (int j = 0; j < NUM_SIDES; j++) {
           // If this is the center piece, always have ONE on the north face
+          System.out.println(ANSI_BLUE + "Rotating piece:\t" + i + ANSI_RESET);
           if (isFirstPlacedPiece(used)) {
             rotatePiece(pieces[i], 1, 0);
           } else {
             rotatePiece(pieces[i], 1, j);
           }
-          System.out.print((j + 1) + "-th Rotation of: " + i + "\n");
-          System.out.print("Placed piece: " + i + "\n");
+          switch (j) {
+            case 0:
+              System.out.print((j + 1) + "st");
+              break;
+            case 1:
+              System.out.print((j + 1) + "nd");
+              break;
+            case 2:
+              System.out.print((j + 1) + "rd");
+              break;
+            default:
+              System.out.print((j + 1) + "th");
+              break;
+          }
+          System.out.println(" rotation:\t" + Arrays.toString(pieces[i]));
+          System.out.println(ANSI_BLUE + "Placing piece:\t" + i + ANSI_RESET);
+
           solveRec(pieces, perm, used, k + 1);
         }
         perm[k] = -1;
