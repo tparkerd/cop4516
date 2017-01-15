@@ -96,21 +96,32 @@ public class hexagon {
 
       // If only two pieces have been placed, that means there is no neighboring
       // piece other than the center one
-      if (perm[2] == -1) {
-        return true;
-      }
+      if (perm[2] == -1)  return true;
 
       System.out.println(ANSI_PURPLE + "TEST SHARED FACE" + ANSI_RESET);
 
       // Check if shared face with previously placed piece are equal
-      int previousPieceSharedFace = pieces[perm[(i + NUM_SIDES) % NUM_PIECES]][pieceIndex % NUM_SIDES];
-      int newPiecePreviousFace = piece[(pieceIndex + 3) % NUM_SIDES];
+      int previousIndex = perm[(i + NUM_SIDES) % NUM_PIECES];
+      int previousShare = pieces[previousIndex][i % NUM_SIDES];
+      int newIndex = perm[(pieceIndex + 3) % NUM_SIDES];
+      int newShare = pieces[newIndex][];
+      // int previousPieceSharedFace = ;
+      // int newPiecePreviousFace = i;
 
-      System.out.printf("p[%d][%d] ===  p[%d][%d]\n", perm[(i + NUM_SIDES) % NUM_PIECES], (pieceIndex % NUM_SIDES), pieceIndex, (pieceIndex + 3) % NUM_SIDES);
-      System.out.printf("Pre[%d]   ===  New[%d]\n", pieceIndex % NUM_SIDES, (pieceIndex + 3) % NUM_SIDES );
-      System.out.printf("  %d      ===  %d", previousPieceSharedFace, newPiecePreviousFace);
+      System.out.printf("Last piece placed: %d\n", previousIndex);
+      System.out.printf("p[%d][%d] ===  p[%d][%d]\n", previousIndex, (pieceIndex % NUM_SIDES), pieceIndex, (pieceIndex + 3) % NUM_SIDES);
+      System.out.printf("Pre[%d]   ===  New[%d]\n", previousIndex, (pieceIndex + 3) % NUM_SIDES );
+      System.out.printf("  %d      ===  %d", previousShare, newShare);
 
-      if (newPiecePreviousFace != previousPieceSharedFace) {
+
+      // int previousPieceSharedFace = pieces[perm[(i + NUM_SIDES) % NUM_PIECES]][pieceIndex % NUM_SIDES];
+      // int newPiecePreviousFace = piece[(pieceIndex + 3) % NUM_SIDES];
+      //
+      // System.out.printf("p[%d][%d] ===  p[%d][%d]\n", perm[(i + NUM_SIDES) % NUM_PIECES], (pieceIndex % NUM_SIDES), pieceIndex, (pieceIndex + 3) % NUM_SIDES);
+      // System.out.printf("Pre[%d]   ===  New[%d]\n", pieceIndex % NUM_SIDES, (pieceIndex + 3) % NUM_SIDES );
+      // System.out.printf("  %d      ===  %d", previousPieceSharedFace, newPiecePreviousFace);
+
+      if (newShare != previousShare) {
         System.out.printf(ANSI_RED + "\t\u2715\n" + ANSI_RESET);
         return false;
       } else {
