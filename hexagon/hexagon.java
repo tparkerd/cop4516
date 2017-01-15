@@ -63,11 +63,16 @@ public class hexagon {
   // Validity Check Function
   public static boolean isValid(int[][] pieces, int[] perm) {
 
+    int i;
+    // Skip any valid positions
+    for (i = 1; (i < perm.length - 1) && (perm[i + 1] != -1); i++);
+    // i = 1;
+
     // Base case: two or fewer pieces placed is always be a valid case
     // Therefore, we start checking on the third placed piece
     // Validate every placed piece until it appears
     // all pieces were placed, or there is an empty position
-    for (int i = 1; (i < perm.length) && (perm[i] != -1); i++) {
+    for (; (i < perm.length) && (perm[i] != -1); i++) {
 
       // Check if placed piece matches the center value's face
       // Get piece out of the perm, to find the values from pieces
@@ -94,6 +99,8 @@ public class hexagon {
       if (perm[2] == -1) {
         return true;
       }
+
+      System.out.println(ANSI_PURPLE + "TEST SHARED FACE" + ANSI_RESET);
 
       // Check if shared face with previously placed piece are equal
       int previousPieceSharedFace = pieces[perm[(i + NUM_SIDES) % NUM_PIECES]][pieceIndex % NUM_SIDES];
