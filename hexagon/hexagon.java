@@ -101,18 +101,35 @@ public class hexagon {
       System.out.println(ANSI_PURPLE + "TEST SHARED FACE" + ANSI_RESET);
 
       // Check if shared face with previously placed piece are equal
-      int previousIndex = perm[(i + NUM_SIDES) % NUM_PIECES];
-      int previousShare = pieces[previousIndex][i % NUM_SIDES];
-      int newIndex = perm[(pieceIndex + 3) % NUM_SIDES];
-      int newShare = pieces[newIndex][];
+
+      // Okay, get the current piece, which is stored at the perm[i]
+      int placedPieceIndexInPieces = perm[i];
+      int[] placedPiece = pieces[placedPieceIndexInPieces];
+
+      // Get the piece that shares a face
+      int previousPieceIndex = perm[i - 1];
+      int[] previousPiecePlaced = pieces[previousPieceIndex];
+
+      // Get the face of the newly placed piece that is shared
+      int currentPieceSharedFaceIndex = (i + 3) % NUM_PIECES;
+      int currentPieceSharedFace = previousPiecePlaced[currentPieceSharedFaceIndex];
+
+      // Get the face fo the previously placed piece that is shared
+      int previousPieceSharedIndex;
+
+
+      // int previousIndex = perm[(i + NUM_SIDES) % NUM_PIECES];
+      // int previousShare = pieces[previousIndex][i % NUM_SIDES];
+      // int newIndex = perm[(pieceIndex + 3) % NUM_SIDES];
+      // int newShare = pieces[newIndex][1];
       // int previousPieceSharedFace = ;
       // int newPiecePreviousFace = i;
 
-      System.out.printf("Last piece placed: %d\n", previousIndex);
-      System.out.printf("p[%d][%d] ===  p[%d][%d]\n", previousIndex, (pieceIndex % NUM_SIDES), pieceIndex, (pieceIndex + 3) % NUM_SIDES);
-      System.out.printf("Pre[%d]   ===  New[%d]\n", previousIndex, (pieceIndex + 3) % NUM_SIDES );
-      System.out.printf("  %d      ===  %d", previousShare, newShare);
-
+      // System.out.printf("Last piece placed: %d\n", previousIndex);
+      // System.out.printf("p[%d][%d] ===  p[%d][%d]\n", previousIndex, (pieceIndex % NUM_SIDES), pieceIndex, (pieceIndex + 3) % NUM_SIDES);
+      // System.out.printf("Pre[%d]   ===  New[%d]\n", previousIndex, (pieceIndex + 3) % NUM_SIDES );
+      // System.out.printf("  %d      ===  %d", previousShare, newShare);
+      //
 
       // int previousPieceSharedFace = pieces[perm[(i + NUM_SIDES) % NUM_PIECES]][pieceIndex % NUM_SIDES];
       // int newPiecePreviousFace = piece[(pieceIndex + 3) % NUM_SIDES];
@@ -121,12 +138,12 @@ public class hexagon {
       // System.out.printf("Pre[%d]   ===  New[%d]\n", pieceIndex % NUM_SIDES, (pieceIndex + 3) % NUM_SIDES );
       // System.out.printf("  %d      ===  %d", previousPieceSharedFace, newPiecePreviousFace);
 
-      if (newShare != previousShare) {
-        System.out.printf(ANSI_RED + "\t\u2715\n" + ANSI_RESET);
-        return false;
-      } else {
-        System.out.printf(ANSI_GREEN + "\t\u2713\n" + ANSI_RESET);
-      }
+      // if (newShare != previousShare) {
+      //   System.out.printf(ANSI_RED + "\t\u2715\n" + ANSI_RESET);
+      //   return false;
+      // } else {
+      //   System.out.printf(ANSI_GREEN + "\t\u2713\n" + ANSI_RESET);
+      // }
 
       // Check the final piece if it has been placed
       if (perm[perm.length - 1] != -1) {
@@ -238,8 +255,6 @@ public class hexagon {
     }
     System.out.printf("----------------------------------\n");
   }
-
-
 
   // Rotate a piece until a chosen value is on the target face of the piece
   // E.g., rotatePiece(piece, 1, 0) would rotate the piece so that 1 would be
