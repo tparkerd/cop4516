@@ -74,10 +74,10 @@ public class hexagon {
       int NUM_SIDES = pieces[0].length;
       int pieceIndex = perm[i];
       int[] piece = pieces[pieceIndex];
-      int centerPieceFace = pieces[0][pieceIndex - 1];
+      int centerPieceFace = pieces[perm[0]][0];
       int newPieceCenterFace = piece[(pieceIndex + 2) % NUM_SIDES];
 
-      System.out.printf("p[%d][%d] ===  p[%d][%d]\n", 0, pieceIndex - 1, pieceIndex, (pieceIndex + 2) % NUM_SIDES);
+      System.out.printf("p[%d][%d] ===  p[%d][%d]\n", 0, perm[0], pieceIndex, (pieceIndex + 2) % NUM_SIDES);
       System.out.printf("Cen[%d]   ===  New[%d]\n", (pieceIndex + 3) % NUM_SIDES, (pieceIndex + 2) % NUM_SIDES );
       System.out.printf("  %d      ===  %d", centerPieceFace, newPieceCenterFace);
 
@@ -89,11 +89,17 @@ public class hexagon {
       }
 
 
+      // If only two pieces have been placed, that means there is no neighboring
+      // piece other than the center one
+      if (perm[2] == -1) {
+        return true;
+      }
+
       // Check if shared face with previously placed piece are equal
-      int previousPieceSharedFace = pieces[pieceIndex - 1][pieceIndex % NUM_SIDES];
+      int previousPieceSharedFace = pieces[perm[(i + NUM_SIDES) % NUM_PIECES]][pieceIndex % NUM_SIDES];
       int newPiecePreviousFace = piece[(pieceIndex + 3) % NUM_SIDES];
 
-      System.out.printf("p[%d][%d] ===  p[%d][%d]\n", pieceIndex - 1, (pieceIndex % NUM_SIDES), pieceIndex, (pieceIndex + 3) % NUM_SIDES);
+      System.out.printf("p[%d][%d] ===  p[%d][%d]\n", perm[(i + NUM_SIDES) % NUM_PIECES], (pieceIndex % NUM_SIDES), pieceIndex, (pieceIndex + 3) % NUM_SIDES);
       System.out.printf("Pre[%d]   ===  New[%d]\n", pieceIndex % NUM_SIDES, (pieceIndex + 3) % NUM_SIDES );
       System.out.printf("  %d      ===  %d", previousPieceSharedFace, newPiecePreviousFace);
 
@@ -104,15 +110,20 @@ public class hexagon {
         System.out.printf(ANSI_GREEN + "\t\u2713\n" + ANSI_RESET);
       }
 
-      // // Check the final piece if it has been placed
-      // if (perm[perm.length - 1] != -1) {
-      //   // Last piece
-      //   int lastPieceFinalFace = pieces[pieceIndex][(pieceIndex + 1) % NUM_SIDES];
-      //   int secondPieceFinalFace = pieces[1][4];
-      //
-      //   if (lastPieceFinalFace != secondPieceFinalFace)
-      //     return false;
-      // }
+      // Check the final piece if it has been placed
+      if (perm[perm.length - 1] != -1) {
+        // Last piece
+        int lastPieceFinalFace = pieces[pieceIndex][1];
+        int secondPieceFinalFace = pieces[1][4];
+
+        if (lastPieceFinalFace != secondPieceFinalFace)
+          return false;
+        // Otherwise, this is a solution!
+        else {
+          System.out.println(Arrays.toString(perm));
+          return true;
+        }
+      }
     }
     return true;
   }
@@ -181,8 +192,6 @@ public class hexagon {
 
           if (isValid(pieces, perm)) {
             solveRec(pieces, perm, used, k + 1);
-          } else {
-            break;
           }
         }
         perm[k] = -1;
