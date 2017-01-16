@@ -3,8 +3,6 @@
 
 public class hexagon {
 
-  public static final boolean DEBUG = false;
-
   public static int NUM_SIDES = 6;
   public static int NUM_PIECES = 7;
   public static boolean solved;
