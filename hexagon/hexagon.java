@@ -5,16 +5,6 @@ public class hexagon {
 
   public static final boolean DEBUG = false;
 
-  public static final String ANSI_RESET = "\u001B[0m";
-  public static final String ANSI_BLACK = "\u001B[30m";
-  public static final String ANSI_RED = "\u001B[31m";
-  public static final String ANSI_GREEN = "\u001B[32m";
-  public static final String ANSI_YELLOW = "\u001B[33m";
-  public static final String ANSI_BLUE = "\u001B[34m";
-  public static final String ANSI_PURPLE = "\u001B[35m";
-  public static final String ANSI_CYAN = "\u001B[36m";
-  public static final String ANSI_WHITE = "\u001B[37m";
-
   public static int NUM_SIDES = 6;
   public static int NUM_PIECES = 7;
   public static boolean solved;
@@ -28,25 +18,23 @@ public class hexagon {
 
     // For each test case...
     for (int i = 1; i <= n; i++) {
+
+      // Assume there is no solution for this test case
       solved = false;
       solution = new int[7];
-      int[][] pieces = new int[NUM_PIECES][NUM_SIDES];
-      // Read in the digits of each piece
-      for (int j = 0; j < NUM_PIECES; j++) {
-        if (DEBUG) System.out.printf("Piece #" + (j) + ": ");
-        for (int k = 0; k < NUM_SIDES; k++) {
-          pieces[j][k] = stdin.nextInt();
-          if (DEBUG) System.out.printf("%d ", pieces[j][k]);
-        }
-        if (DEBUG) System.out.println();
-      }
 
-      System.out.printf("Case " + i + ": ");
+      // Read in the digits of each piece
+      int[][] pieces = new int[NUM_PIECES][NUM_SIDES];
+      for (int j = 0; j < NUM_PIECES; j++)
+        for (int k = 0; k < NUM_SIDES; k++)
+          pieces[j][k] = stdin.nextInt();
 
       // Clean out order array
       int[] perm = new int[NUM_PIECES];
       for (int j = 0; j < NUM_PIECES; j++)
-        perm[j] = -1;
+      perm[j] = -1;
+
+      System.out.printf("Case " + i + ": ");
 
       solveRec(pieces, perm, new boolean[NUM_PIECES], 0);
       if (solved)
@@ -69,13 +57,10 @@ public class hexagon {
   //  perm:   The current permuation
   //
   public static void solveRec(int[][] pieces, int[] perm, boolean[] used, int k) {
-    if (DEBUG) System.out.print(ANSI_RED + "\n-----------------------------------\n~Permutation~\t");
-    if (DEBUG) printOrder(perm);
-    if (DEBUG) System.out.println(ANSI_RESET);
-    if (DEBUG) printBoard(pieces, perm);
 
+    // Base case: if the current permuation is invalid, do not bother trying
+    // subsequent cases
     if(!isValid(pieces, perm)) return;
-
 
     // For each of the unused pieces...
     for (int i = 0; i < perm.length; i++) {
@@ -90,45 +75,23 @@ public class hexagon {
         for (int j = 0; j < NUM_SIDES; j++) {
 
           // If this is the center piece, always have ONE on the north face
-          if (DEBUG) System.out.println(ANSI_BLUE + "Rotating piece:\t" + i + ANSI_RESET);
-          if (isFirstPlacedPiece(used)) {
-            if (DEBUG) System.out.println(ANSI_CYAN + "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~FIRST PLACED IN PERM" + ANSI_RESET);
+          if (isFirstPlacedPiece(used))
             rotatePiece(pieces[i], 1, 0);
-          } else {
+          else
             rotatePiece(pieces[i], 1, j);
-          }
-          switch (j) {
-            case 0:
-              if (DEBUG) System.out.print((j + 1) + "st");
-              break;
-            case 1:
-              if (DEBUG) System.out.print((j + 1) + "nd");
-              break;
-            case 2:
-              if (DEBUG) System.out.print((j + 1) + "rd");
-              break;
-            default:
-              if (DEBUG) System.out.print((j + 1) + "th");
-              break;
-          }
-          if (DEBUG) System.out.println(" rotation:\t" + Arrays.toString(pieces[i]));
-          if (DEBUG) System.out.println(ANSI_BLUE + "Placing piece:\t" + i + ANSI_RESET);
 
           solveRec(pieces, perm, used, k + 1);
 
-          if (solved) {
-            if (DEBUG) System.out.println("Solution found: " + Arrays.toString(perm));
-            if (DEBUG) System.out.println("YOU NEED TO EXIT THE CALLS NOW");
-            return;
-          }
+          // Base case: if this candiate perm is the solution, exit
+          if (solved) return;
 
         }
+
+        // Mark the current piece as unused for alternate permutations
         perm[k] = -1;
         used[i] = false;
-
       }
     }
-    return;
   }
 
   // Validity Check Function
@@ -148,25 +111,12 @@ public class hexagon {
       // Check if placed piece matches the center value's face
       // Get piece out of the perm, to find the values from pieces
       int pieceIndex = perm[i]; // Piece #
-      int[] piece = pieces[pieceIndex]; // Piece Values
-      int centerPieceFace = pieces[perm[0]][(i + NUM_SIDES - 1) % NUM_SIDES]; // CHECK
-      int newPieceCenterFace = piece[(i + 2) % NUM_SIDES]; // CHECK
+      int[] piece = pieces[pieceIndex]; // Piece Value
+      int centerPieceFace = pieces[perm[0]][(i + NUM_SIDES - 1) % NUM_SIDES]; // Center's face index
+      int newPieceCenterFace = piece[(i + 2) % NUM_SIDES]; // New piece's face value
 
-      if (DEBUG) System.out.print(ANSI_YELLOW);
-
-      if (DEBUG) System.out.printf("\np[%d][%d] ===  p[%d][%d]\n", perm[0], (i + NUM_SIDES - 1) % NUM_SIDES, pieceIndex, (i + 2) % NUM_SIDES);
-      // if (DEBUG) System.out.printf("Cen[%d]   ===  New[%d]\n", (i + NUM_SIDES - 1) % NUM_SIDES, (pieceIndex + 2) % NUM_SIDES );
-      if (DEBUG) System.out.printf("   %d    ===     %d", centerPieceFace, newPieceCenterFace);
-
-      if (DEBUG) System.out.print(ANSI_RESET);
-
-      if (newPieceCenterFace != centerPieceFace) {
-        if (DEBUG) System.out.printf(ANSI_RED + "\t\u2715\n" + ANSI_RESET);
-        return false;
-      } else {
-        if (DEBUG) System.out.printf(ANSI_GREEN + "\t\u2713\n" + ANSI_RESET);
-      }
-
+      // Check if the new piece and the center piece share identical values
+      if (newPieceCenterFace != centerPieceFace) return false;
 
       // If only two pieces have been placed, that means there is no neighboring
       // piece other than the center one
@@ -174,9 +124,7 @@ public class hexagon {
 
       // Check if shared face with previously placed piece are equal
 
-      ////////////////////
       // CURRENT PIECE
-      ////////////////////
       // Okay, get the current piece, which is stored at the perm[i]
       int placedPieceIndexInPieces = perm[i]; // CHECK
       int[] placedPiece = pieces[placedPieceIndexInPieces]; // CHECK
@@ -185,48 +133,28 @@ public class hexagon {
       int currentPieceSharedFaceIndex = (i + 3) % NUM_SIDES; // CHECK
       int currentPieceSharedFace = placedPiece[currentPieceSharedFaceIndex]; // -- UNSURE
 
-      ////////////////////
       // PREVIOUS PIECE
-      ////////////////////
       // Get the piece that shares a face
       int previousPieceIndex = perm[(i + (NUM_PIECES - 1)) % NUM_PIECES]; // CHECK
       int[] previousPiecePlaced = pieces[previousPieceIndex]; // CHECK
 
-      // Get the face of the previously placed piece that shares a face
+      // Get the face fo the previously placed piece that is shared
       int previousPieceSharedFaceIndex = i % NUM_SIDES;
       int previousPieceSharedFace = previousPiecePlaced[previousPieceSharedFaceIndex];
 
-      // Get the face fo the previously placed piece that is shared
-      if (DEBUG) System.out.printf(ANSI_CYAN+"Last piece placed: %d\n", placedPieceIndexInPieces);
-      if (DEBUG) System.out.printf("p[%d][%d] ===  p[%d][%d]\n",
-       previousPieceIndex, // CHECK
-       previousPieceSharedFaceIndex, // CHECK
-       placedPieceIndexInPieces, // CHECK
-       currentPieceSharedFaceIndex); // CHECK
-      // if (DEBUG) System.out.printf("Pre[%d]   ===  New[%d]\n", previousPieceSharedFaceIndex, currentPieceSharedFaceIndex);
-      if (DEBUG) System.out.printf("  %d      ===  %d" + ANSI_RESET, previousPieceSharedFace, currentPieceSharedFace);
-
-
-      if (previousPieceSharedFace != currentPieceSharedFace) {
-        if (DEBUG) System.out.printf(ANSI_RED + "\t\u2715\n" + ANSI_RESET);
-        return false;
-      } else {
-        if (DEBUG) System.out.printf(ANSI_GREEN + "\t\u2713\n" + ANSI_RESET);
-      }
+      if (previousPieceSharedFace != currentPieceSharedFace) return false;
 
       // Check the final piece if it has been placed
+      // **Hacky** - could be cleaned up and use the NUM_PIECES
       if (perm[perm.length - 1] != -1) {
         // Last piece
-        if (DEBUG) System.out.println(ANSI_CYAN + "CHECK LAST PIECE" + ANSI_RESET);
-        if (DEBUG) System.out.printf("\np[%d][%d] ===  p[%d][%d]\n", perm[6], 1, perm[1], 4);
         int lastPieceFinalFace = pieces[perm[6]][1];
         int secondPieceFinalFace = pieces[perm[1]][4];
 
         if (lastPieceFinalFace != secondPieceFinalFace)
           return false;
-        // Otherwise, this is a solution!
+        // Otherwise, the solution was found
         else {
-          if (DEBUG) System.out.println(Arrays.toString(perm));
           solved = true;
           solution = perm;
           return true;
@@ -236,75 +164,6 @@ public class hexagon {
     return true;
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   public static boolean isFirstPlacedPiece(boolean[] used) {
     int count = 0;
     for (int i = 0; i < used.length; i++) {
@@ -313,16 +172,6 @@ public class hexagon {
       }
     }
     return (count < 2);
-  }
-
-  public static void printBoard(int[][] pieces, int[] perm) {
-    System.out.printf("Board:\n");
-    System.out.printf("----------------------------------\n");
-    for (int j = 0; j < perm.length && perm[j] > -1; j++) {
-      System.out.printf("Piece #%d:\t", perm[j]);
-      System.out.printf("%s\n", Arrays.toString(pieces[perm[j]]));
-    }
-    System.out.printf("----------------------------------\n");
   }
 
   // Rotate a piece until a chosen value is on the target face of the piece
@@ -341,7 +190,6 @@ public class hexagon {
       // Put the last piece into the first face
       piece[0] = last;
     }
-    // printOrder(piece);
   }
 
   public static void printOrder(int[] list) {
@@ -351,18 +199,4 @@ public class hexagon {
     System.out.println();
   }
 
-  public static void printPerm(int[] perm, boolean[] used, int k) {
-    if (k == perm.length) {
-      System.out.println(Arrays.toString(perm));
-      return;
-    }
-    for (int i = 0; i < perm.length; i++) {
-      if (!used[i]) {
-        used[i] = true;
-        perm[k] = i;
-        printPerm(perm, used, k + 1);
-        used[i] = false;
-      }
-    }
-  }
 }
