@@ -17,9 +17,6 @@ public class hexagon {
 
   public static int NUM_SIDES = 6;
   public static int NUM_PIECES = 7;
-  public static int[] candidateAnswer;
-  public static boolean[] usedPieces;
-  public static int callCount;
 
   public static void main(String[] args) {
     Scanner stdin = new Scanner(System.in);
@@ -27,10 +24,8 @@ public class hexagon {
     // Get number of test cases
     int n = stdin.nextInt();
 
-    callCount = 0;
     // For each test case...
     for (int i = 1; i <= n; i++) {
-      usedPieces = new boolean[NUM_PIECES];
       int[][] pieces = new int[NUM_PIECES][NUM_SIDES];
       // Read in the digits of each piece
       for (int j = 0; j < NUM_PIECES; j++) {
@@ -54,6 +49,78 @@ public class hexagon {
     }
   }
 
+  //
+  // Recursive approach to solving the problem
+  //
+  //  pieces: a list of the pieces
+  //  used:   a list of used pieces (i.e., [T,F,F,T,F,F])
+  //          Where the 1st and 4th pieces have been placed.
+  //  k:      A counter of how many pieces have been placed
+  //          This will start at zero, which will actually equate to the
+  //          index of where the next piece should be placed. So make sure
+  //          that this gets incremented on each call to place the next piece.
+  //  perm:   The current permuation
+  //
+  public static boolean solveRec(int[][] pieces, int[] perm, boolean[] used, int k) {
+    if (DEBUG) System.out.print(ANSI_RED + "\n\n~Permutation~\t");
+    if (DEBUG) printOrder(perm);
+    if (DEBUG) System.out.println(ANSI_RESET);
+    if (DEBUG) printBoard(pieces, perm);
+
+
+    if (k >= perm.length) {
+      if (DEBUG) System.out.println(ANSI_RED);
+      printOrder(perm);
+      if (DEBUG) System.out.print(ANSI_RESET);
+      return true;
+    }
+
+    // For each of the unused pieces...
+    for (int i = 0; i < perm.length; i++) {
+      // If one that is available
+      if (!used[i]) {
+
+        // Mark it as used
+        used[i] = true;
+        perm[k] = i;
+
+        // Rotate each one and try it in place
+        for (int j = 0; j < NUM_SIDES; j++) {
+          // If this is the center piece, always have ONE on the north face
+          if (DEBUG) System.out.println(ANSI_BLUE + "Rotating piece:\t" + i + ANSI_RESET);
+          if (isFirstPlacedPiece(used)) {
+            if (DEBUG) System.out.println(ANSI_CYAN + "FIRST PLACED IN PERM" + ANSI_RESET);
+            rotatePiece(pieces[i], 1, 0);
+          } else {
+            rotatePiece(pieces[i], 1, j);
+          }
+          switch (j) {
+            case 0:
+              break;
+            case 1:
+              if (DEBUG) System.out.print((j + 1) + "nd");
+              break;
+            case 2:
+              if (DEBUG) System.out.print((j + 1) + "rd");
+              break;
+            default:
+              if (DEBUG) System.out.print((j + 1) + "th");
+              break;
+          }
+          if (DEBUG) System.out.println(" rotation:\t" + Arrays.toString(pieces[i]));
+          if (DEBUG) System.out.println(ANSI_BLUE + "Placing piece:\t" + i + ANSI_RESET);
+
+          if (isValid(pieces, perm)) {
+            return solveRec(pieces, perm, used, k + 1);
+          }
+        }
+        perm[k] = -1;
+        used[i] = false;
+
+      }
+    }
+    return false;
+  }
 
   // Validity Check Function
   public static boolean isValid(int[][] pieces, int[] perm) {
@@ -120,26 +187,16 @@ public class hexagon {
       int previousPieceSharedFaceIndex = i % NUM_SIDES;
       int previousPieceSharedFace = previousPiecePlaced[previousPieceSharedFaceIndex];
 
-      System.out.print(ANSI_CYAN);
-
       // Get the face fo the previously placed piece that is shared
-      if (DEBUG) System.out.printf("Last piece placed: %d\n", placedPieceIndexInPieces);
+      if (DEBUG) System.out.printf(ANSI_CYAN+"Last piece placed: %d\n", placedPieceIndexInPieces);
       if (DEBUG) System.out.printf("p[%d][%d] ===  p[%d][%d]\n",
        previousPieceIndex, // CHECK
        previousPieceSharedFaceIndex, // CHECK
        placedPieceIndexInPieces, // CHECK
        currentPieceSharedFaceIndex); // CHECK
       if (DEBUG) System.out.printf("Pre[%d]   ===  New[%d]\n", previousPieceSharedFaceIndex, currentPieceSharedFaceIndex);
-      if (DEBUG) System.out.printf("  %d      ===  %d", previousPieceSharedFace, currentPieceSharedFace);
+      if (DEBUG) System.out.printf("  %d      ===  %d" + ANSI_RESET, previousPieceSharedFace, currentPieceSharedFace);
 
-
-      System.out.print(ANSI_RESET);
-      // int previousPieceSharedFace = pieces[perm[(i + NUM_SIDES) % NUM_PIECES]][pieceIndex % NUM_SIDES];
-      // int newPiecePreviousFace = piece[(pieceIndex + 3) % NUM_SIDES];
-      //
-      // System.out.printf("p[%d][%d] ===  p[%d][%d]\n", perm[(i + NUM_SIDES) % NUM_PIECES], (pieceIndex % NUM_SIDES), pieceIndex, (pieceIndex + 3) % NUM_SIDES);
-      // System.out.printf("Pre[%d]   ===  New[%d]\n", pieceIndex % NUM_SIDES, (pieceIndex + 3) % NUM_SIDES );
-      // System.out.printf("  %d      ===  %d", previousPieceSharedFace, newPiecePreviousFace);
 
       if (previousPieceSharedFace != currentPieceSharedFace) {
         if (DEBUG) System.out.printf(ANSI_RED + "\t\u2715\n" + ANSI_RESET);
@@ -167,80 +224,74 @@ public class hexagon {
     return true;
   }
 
-  //
-  // Recursive approach to solving the problem
-  //
-  //  pieces: a list of the pieces
-  //  used:   a list of used pieces (i.e., [T,F,F,T,F,F])
-  //          Where the 1st and 4th pieces have been placed.
-  //  k:      A counter of how many pieces have been placed
-  //          This will start at zero, which will actually equate to the
-  //          index of where the next piece should be placed. So make sure
-  //          that this gets incremented on each call to place the next piece.
-  //  perm:   The current permuation
-  //
-  public static boolean solveRec(int[][] pieces, int[] perm, boolean[] used, int k) {
-    // if (SOLUTION_FOUND) return;
-    if (DEBUG) System.out.print(ANSI_YELLOW + "\n\n~Permutation~\t");
-    // System.out.println(Arrays.toString(perm) + ANSI_RESET);
-    if (DEBUG) printOrder(perm);
-    if (DEBUG) System.out.println(ANSI_RESET);
-    if (DEBUG) printBoard(pieces, perm);
 
 
-    if (k >= perm.length) {
-      if (DEBUG) System.out.println(ANSI_RED);
-      printOrder(perm);
-      if (DEBUG) System.out.print(ANSI_RESET);
-      return true;
-    }
 
-    // For each of the unused pieces...
-    for (int i = 0; i < perm.length; i++) {
-      // If one that is available
-      if (!used[i]) {
 
-        // Mark it as used
-        used[i] = true;
-        perm[k] = i;
 
-        // Rotate each one and try it in place
-        for (int j = 0; j < NUM_SIDES; j++) {
-          // If this is the center piece, always have ONE on the north face
-          if (DEBUG) System.out.println(ANSI_BLUE + "Rotating piece:\t" + i + ANSI_RESET);
-          if (isFirstPlacedPiece(used)) {
-            if (DEBUG) System.out.println(ANSI_CYAN + "FIRST PLACED IN PERM" + ANSI_RESET);
-            rotatePiece(pieces[i], 1, 0);
-          } else {
-            rotatePiece(pieces[i], 1, j);
-          }
-          switch (j) {
-            case 0:
-              break;
-            case 1:
-              if (DEBUG) System.out.print((j + 1) + "nd");
-              break;
-            case 2:
-              if (DEBUG) System.out.print((j + 1) + "rd");
-              break;
-            default:
-              if (DEBUG) System.out.print((j + 1) + "th");
-              break;
-          }
-          if (DEBUG) System.out.println(" rotation:\t" + Arrays.toString(pieces[i]));
-          if (DEBUG) System.out.println(ANSI_BLUE + "Placing piece:\t" + i + ANSI_RESET);
 
-          if (isValid(pieces, perm)) {
-            return solveRec(pieces, perm, used, k + 1);
-          }
-        }
-        perm[k] = -1;
-        used[i] = false;
 
-      }
-    }
-    return false;
-  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   public static boolean isFirstPlacedPiece(boolean[] used) {
     int count = 0;
