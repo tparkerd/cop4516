@@ -22,14 +22,9 @@ public class diamond {
       // Max size difference
       int k = stdin.nextInt();
       // For each diamond...
-      int[] list = new int[nDiamonds];
       for (int j = 0; j < nDiamonds; j++) {
-        list[j] = stdin.nextInt();
-      }
+        int diamond = stdin.nextInt();
 
-      // Process the diamonds
-      for (int j = 0; j < nDiamonds; j++) {
-        int diamond = list[j];
         // If no diamond has been placed, place the first one in the first case
         if (j == 0) {
             case1.list.add(diamond);
@@ -48,11 +43,7 @@ public class diamond {
 
       int diamondsPlaced = case1.list.size() + case2.list.size();
       System.out.println(diamondsPlaced);
-
-      if (DEBUG) System.out.println(Arrays.toString(list));
     }
-
-
   }
 }
 
@@ -65,12 +56,19 @@ class DiamondCase {
 
   // See if the current diamond can fit in
   public boolean canFit(int n, int k) {
-    boolean result = true;
+
+    // Base case: case is empty, it can fit
+    if (this.list.size() == 0) return true;
+
     // See if the new diamond is within K values of each diamond already in the case
-    for (int i = 0; i < this.list.size(); i++) {
+    for (int i = 0;i < this.list.size(); i++) {
       // If a diamond exceeds K difference between them, this cannot be added
-      if (Math.abs(list.get(i) - n) > k) result = false;
+      if (Math.abs(list.get(i) - n) > k) return false;
     }
-    return result;
+
+    return true;
+
+    // System.out.println(this.list.toString());
+    // if (Math.abs(this.list.get(0) - n) > k) result = false;
   }
 }
