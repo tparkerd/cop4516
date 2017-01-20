@@ -3,7 +3,7 @@ import java.util.Collections;
 import java.util.ArrayList;
 
 public class conference {
-  ArrayList<Conference> schedule;
+  public static ArrayList<Conference> schedule;
 
   public static void main(String[] args) {
 
@@ -16,22 +16,26 @@ public class conference {
         int start = stdin.nextInt();
         int duration = stdin.nextInt();
         Conference tmp = new Conference(start, duration);
+        schedule.add(tmp);
       }
+      // Sort the damn things by their ending time
+      Collections.sort(schedule);
     }
-
-
   }
-
-
 }
 
-abstract class Conference implements Comparable<Object> {
+abstract class Conference implements Comparable<Conference> {
   int end;
   int duration;
+  int value;
 
   public Conference(int start, int duration) {
     this.duration = duration;
     this.end = start + duration;
+    this.value = 0;
+    for (int i = 1; i <= duration; i++) {
+      this.value += (2e29) / (2 * i);
+    }
   }
 
   public int compareTo(Conference c, Conference o) {
