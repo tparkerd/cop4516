@@ -1,13 +1,11 @@
 import java.util.*;
+import java.math.*;
 
 public class conference {
-  public static final boolean DEBUG = true;
+  public static final boolean DEBUG = false;
   public static ArrayList<Conference> schedule;
 
   public static void main(String[] args) {
-
-    Long tmp1 = Long.MAX_VALUE();
-
     Scanner stdin = new Scanner(System.in);
     int nCases = stdin.nextInt();
     for (int i = 0; i < nCases; i++) {
@@ -36,10 +34,13 @@ public class conference {
       for (Conference c : schedule) {
         if (c.start >= lastEndingTime) {
           total += c.worth;
+          // Move up the next available day to the end of the current conference
+          lastEndingTime = c.end;
         }
       }
 
       if (DEBUG) System.out.println("Earned: " + total);
+      System.out.println(total);
 
     }
   }
@@ -56,9 +57,8 @@ class Conference implements Comparable<Conference> {
     this.duration = duration;
     this.end = start + duration;
     this.worth = 0;
-    for (int i = start; i <= duration; i++) {
-      this.worth += (2e29) / (2 * i);
-      // this.worth += this.duration;
+    for (int i = start; i < end; i++) {
+      this.worth += Math.round(Math.pow(2, 29 - i));
     }
   }
 
