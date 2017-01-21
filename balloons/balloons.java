@@ -34,6 +34,10 @@ public class balloons {
       Collections.sort(teams);
       System.out.print(teams.toString());
 
+      for (Team team : teams) {
+        System.out.println(team.toString());
+      }
+
     } while (n != 0);
 
 
