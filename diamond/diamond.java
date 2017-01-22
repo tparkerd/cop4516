@@ -2,7 +2,7 @@ import java.util.*;
 import java.math.*;
 
 public class diamond {
-  public static final boolean DEBUG = true;
+  public static final boolean DEBUG = false;
 
   public static void main(String[] args) {
     // Read in the data
@@ -64,24 +64,35 @@ public class diamond {
       if (DEBUG) System.out.print("Count List:\t");
       if (DEBUG) System.out.println(Arrays.toString(countList));
 
-      int secondMax = 0;
+      int tmpSecondMax = 0;
       for (int j = 0; j < nDiamonds; j++) {
         // Base case: if J is currently traversing the range found as the
         // longest range in the set, skip it
-        int start = maxIndex;
-        int end = countList[maxIndex] + start - 1;
+        int forbiddenStart = maxIndex;                                 // Where the forbidden range starts
+        int forbiddenEnd = countList[maxIndex] + forbiddenStart - 1;   // Where the forbidden range ends
+        int start = j;                                                 // Where the current range starts
+        int end = countList[j] + start - 1;                             // Where the current range ends
         if (DEBUG) System.out.println("Check bounds // Start: " + start + ", End: " + end);
-        int tmpStart = j;
-        int tmpEnd = j + countList[j] - 1;
-        if ( (tmpStart >= start && tmpStart <= end) || (tmpEnd >= start && tmpEnd <= end) )
-          continue;
 
-        secondMax = Math.max(secondMax, countList[j]);
+
+        // Base case: if the range starts within the forbidden range, skip
+        // to the end of the forbidden range
+        if (start >= forbiddenStart && start <= forbiddenEnd) continue;
+
+        // If we start the current range before the known max and ends
+        // after it starts
+        if (start < forbiddenStart && end >= forbiddenStart) {
+          // See by how many elements it overlaps
+          int overlap = end - forbiddenStart + 1;
+          tmpSecondMax = Math.max(tmpSecondMax, countList[j] - overlap);
+        } else {
+          tmpSecondMax = Math.max(tmpSecondMax, countList[j]);
+        }
       }
 
-      if (DEBUG) System.out.println("First max: " + countList[maxIndex] + "\nSecond max: " + secondMax);
+      if (DEBUG) System.out.println("First max: " + countList[maxIndex] + "\nSecond max: " + tmpSecondMax);
 
-      System.out.println(countList[maxIndex] + secondMax);
+      System.out.println(countList[maxIndex] + tmpSecondMax);
 
     }
   }
