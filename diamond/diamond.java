@@ -11,7 +11,7 @@ public class diamond {
     int nCases = stdin.nextInt();
 
     // For each case...
-    for (int i = 0; i < nCases; i++) {
+    for (int i = 0; i < nCases && stdin.hasNext(); i++) {
       // Get the case details
       int nDiamonds = stdin.nextInt();      // Number of diamonds
       int k = stdin.nextInt();              // Max size difference
@@ -20,13 +20,9 @@ public class diamond {
       for (int j = 0; j < nDiamonds; j++)
         diamonds[j] = stdin.nextInt();
 
-      if (DEBUG) System.out.println(Arrays.toString(diamonds));
-
-      // Sort the diamonds
+      // Sort the diamonds, ascending order
       Arrays.sort(diamonds);
-      // diamonds = reverse(diamonds);
-      if (DEBUG) System.out.println(Arrays.toString(diamonds));
-      // if (DEBUG) System.out.println("LOW\tHIGH\t[LOW]\t[HIGH]\tDIFF\n------------------------------------");
+      if (DEBUG) System.out.println("Sorted:\t\t" + Arrays.toString(diamonds));
 
       int[] countList = new int[nDiamonds];
       for (int low = 0, high = low + 1; low < nDiamonds; ) {
@@ -38,9 +34,6 @@ public class diamond {
           high = low + 1;
           continue;
         }
-
-
-        // if (DEBUG) System.out.println(low + "\t" + high + "\t" + diamonds[low] + "\t" + diamonds[high] + "\t" + (upper - lower));
 
         // Diamonds are within the bounds of the array
         // When the difference is greater than the size difference restriction
@@ -58,10 +51,7 @@ public class diamond {
         }
       }
 
-      // Now we have a list of all the diamond ranges
-      // Let's find the maxes from the righthand side
-
-      int[] rightHandMax = new int[nDiamonds];
+      // Now let's find the index of the rightmost, longest stretch
       int max = 0;
       int maxIndex = nDiamonds - 1;
       for (int j = nDiamonds - 1; j >= 0; j--) {
@@ -69,21 +59,21 @@ public class diamond {
           max = countList[j];
           maxIndex = j;
         }
-        rightHandMax[j] = max;
       }
 
-      // if (DEBUG) System.out.println("Max index in righthand: " + maxIndex);
-
-      if (DEBUG) System.out.println("Count List:");
+      if (DEBUG) System.out.print("Count List:\t");
       if (DEBUG) System.out.println(Arrays.toString(countList));
-      // if (DEBUG) System.out.println("Max List:");
-      // if (DEBUG) System.out.println(Arrays.toString(rightHandMax));
 
       int secondMax = 0;
       for (int j = 0; j < nDiamonds; j++) {
         // Base case: if J is currently traversing the range found as the
         // longest range in the set, skip it
-        if (j >= maxIndex && j < countList[maxIndex] + maxIndex - 1)
+        int start = maxIndex;
+        int end = countList[maxIndex] + start - 1;
+        if (DEBUG) System.out.println("Check bounds // Start: " + start + ", End: " + end);
+        int tmpStart = j;
+        int tmpEnd = j + countList[j] - 1;
+        if ( (tmpStart >= start && tmpStart <= end) || (tmpEnd >= start && tmpEnd <= end) )
           continue;
 
         secondMax = Math.max(secondMax, countList[j]);
