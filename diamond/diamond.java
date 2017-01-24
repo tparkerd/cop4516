@@ -61,111 +61,48 @@ public class diamond {
         }
       }
 
-      // // Now let's find the index of the rightmost, longest stretch
-      // int max = 0;
-      // int maxIndex = nDiamonds - 1;
-      // for (int j = nDiamonds - 1; j >= 0; j--) {
-      //   if (list[j] > max) {
-      //     max = list[j];
-      //     maxIndex = j;
-      //   }
-      // }
+      // Now let's find the index of the rightmost, longest stretch
+      int max = 0;
+      int maxIndex = nDiamonds - 1;
+      for (int j = nDiamonds - 1; j >= 0; j--) {
+        if (list[j] > max) {
+          max = list[j];
+          maxIndex = j;
+        }
+      }
 
       if (DEBUG) System.out.print("Count List:\t");
       if (DEBUG) System.out.println(Arrays.toString(list));
 
+      int tmpSecondMax = 0;
+      for (int j = 0; j < nDiamonds; j++) {
+        // Base case: if J is currently traversing the range found as the
+        // longest range in the set, skip it
+        int forbiddenStart = maxIndex;                                 // Where the forbidden range starts
+        int forbiddenEnd = list[maxIndex] + forbiddenStart - 1;   // Where the forbidden range ends
+        int start = j;                                                 // Where the current range starts
+        int end = list[j] + start - 1;                             // Where the current range ends
+        if (DEBUG) System.out.println("Check bounds // Start: " + start + ", End: " + end);
 
-      int firstMaxIndex = 0;
-      int secondMaxIndex = nDiamonds - 1;
 
-      if (DEBUG) System.out.println("--------------------------------\nLEFT\tRIGHT\tL-Range\tR-Range\n--------------------------------");
+        // Base case: if the range starts within the forbidden range, skip
+        // to the end of the forbidden range
+        if (start >= forbiddenStart && start <= forbiddenEnd) continue;
 
-      // Sweep through until the ranges overlap
-      // So long as the end of the current range does not overlap with the start
-      // of the rightmost index, continue on...
-      for (int j = 0; (j < nDiamonds) && (list[j] + j - 1) < secondMaxIndex; j++) {
-        if (DEBUG) System.out.printf(ANSI_BLUE + "[%d]\t[%d]\t%d\t%d\n" + ANSI_RESET, j, nDiamonds - j - 1, list[j], list[nDiamonds - j - 1]);
-
-        // Save the last known working indices
-        int firstTmp = firstMaxIndex;
-        int secondTmp = secondMaxIndex;
-
-        // Base case: if they land on the same index
-        if (j == nDiamonds - j - 1) {
-          // Replace the smaller of the two ranges with the larger one, and check for overlap
-          if (list[firstMaxIndex] > list[secondMaxIndex]) {
-            // Test for overlap
-            if ((list[j] - 1) >= secondMaxIndex) {
-            } else {
-              secondMaxIndex = j;
-            }
-            break;
-          }
-        }
-
-        // if (DEBUG) System.out.printf(ANSI_BLUE + "First temp: %d\tSecd temp: %d\n" + ANSI_RESET, firstTmp, secondTmp);
-
-        // See if the current lefthand range is larger than the previously known one
-        if (list[j] > list[firstMaxIndex]) {
-          firstMaxIndex = j;
-          if (DEBUG) System.out.printf(ANSI_GREEN + "[%d]\t[%d]\t%d\t%d\n" + ANSI_RESET, j, nDiamonds - j - 1, list[j], list[nDiamonds - j - 1]);
-        }
-
-        // Make sure the next left doesn't overlap the previous right
-
-        if (DEBUG) System.out.printf(ANSI_CYAN + "Check if out of bounds: %d >= %d\n" + ANSI_RESET, (list[j] + j - 1), secondMaxIndex);
-        if ((list[j] + j - 1) >= secondMaxIndex) {
-          firstMaxIndex = firstTmp;
-          if (DEBUG) System.out.println(ANSI_RED + "Change " + list[j] + " back to " + firstTmp + ANSI_RESET);
-        }
-
-        // Check to see if the next index largest from the righthand is larger than
-        // the one before it
-        if (list[nDiamonds - 1 - j] > list[secondMaxIndex]) {
-          secondMaxIndex = nDiamonds - j - 1;
-          if (DEBUG) System.out.printf(ANSI_GREEN + "[%d]\t[%d]\t%d\t%d\n" + ANSI_RESET, j, nDiamonds - j - 1, list[j], list[nDiamonds - j - 1]);
-        }
-
-        if (DEBUG) System.out.printf(ANSI_CYAN + "Check if out of bounds: %d >= %d\n" + ANSI_RESET, (list[j] + j - 1), secondMaxIndex);
-        // Make sure the next left doesn't overlap the previous right
-        if ((list[j] + j - 1) >= secondMaxIndex) {
-          if (DEBUG) System.out.println(ANSI_RED + "change " + secondMaxIndex + " back to " + secondTmp + ANSI_RESET);
-          if (DEBUG) System.out.println(ANSI_RED + secondTmp + ANSI_RESET);
-          secondMaxIndex = secondTmp;
+        // If we start the current range before the known max and ends
+        // after it starts
+        if (start < forbiddenStart && end >= forbiddenStart) {
+          // See by how many elements it overlaps
+          int overlap = end - forbiddenStart + 1;
+          tmpSecondMax = Math.max(tmpSecondMax, list[j] - overlap);
+        } else {
+          tmpSecondMax = Math.max(tmpSecondMax, list[j]);
         }
       }
 
+      if (DEBUG) System.out.println("First max: " + list[maxIndex] + "\nSecond max: " + tmpSecondMax);
 
-
-      // int tmpSecondMax = 0;
-      // for (int j = 0; j < nDiamonds; j++) {
-      //   // Base case: if J is currently traversing the range found as the
-      //   // longest range in the set, skip it
-      //   int forbiddenStart = maxIndex;                                 // Where the forbidden range starts
-      //   int forbiddenEnd = list[maxIndex] + forbiddenStart - 1;   // Where the forbidden range ends
-      //   int start = j;                                                 // Where the current range starts
-      //   int end = list[j] + start - 1;                             // Where the current range ends
-      //   if (DEBUG) System.out.println("Check bounds // Start: " + start + ", End: " + end);
-      //
-      //
-      //   // Base case: if the range starts within the forbidden range, skip
-      //   // to the end of the forbidden range
-      //   if (start >= forbiddenStart && start <= forbiddenEnd) continue;
-      //
-      //   // If we start the current range before the known max and ends
-      //   // after it starts
-      //   if (start < forbiddenStart && end >= forbiddenStart) {
-      //     // See by how many elements it overlaps
-      //     int overlap = end - forbiddenStart + 1;
-      //     tmpSecondMax = Math.max(tmpSecondMax, list[j] - overlap);
-      //   } else {
-      //     tmpSecondMax = Math.max(tmpSecondMax, list[j]);
-      //   }
-      // }
-
-      if (DEBUG) System.out.println("First max: " + list[firstMaxIndex] + "\nSecond max: " + list[secondMaxIndex]);
-
-      System.out.println(list[firstMaxIndex] + list[secondMaxIndex]);
+      System.out.println(list[maxIndex] + tmpSecondMax);
       if (DEBUG) System.out.println("-----END CASE-----");
     }
   }
