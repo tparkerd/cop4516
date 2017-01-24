@@ -4,6 +4,16 @@ import java.math.*;
 public class diamond {
   public static final boolean DEBUG = true;
 
+  public static final String ANSI_RESET = "\u001B[0m";
+  public static final String ANSI_BLACK = "\u001B[30m";
+  public static final String ANSI_RED = "\u001B[31m";
+  public static final String ANSI_GREEN = "\u001B[32m";
+  public static final String ANSI_YELLOW = "\u001B[33m";
+  public static final String ANSI_BLUE = "\u001B[34m";
+  public static final String ANSI_PURPLE = "\u001B[35m";
+  public static final String ANSI_CYAN = "\u001B[36m";
+  public static final String ANSI_WHITE = "\u001B[37m";
+
   public static void main(String[] args) {
     // Read in the data
     Scanner stdin = new Scanner(System.in);
@@ -68,34 +78,59 @@ public class diamond {
       int firstMaxIndex = 0;
       int secondMaxIndex = nDiamonds - 1;
 
+      if (DEBUG) System.out.println("--------------------------------\nLEFT\tRIGHT\tL-Range\tR-Range\n--------------------------------");
+
       // Sweep through until the ranges overlap
       // So long as the end of the current range does not overlap with the start
       // of the rightmost index, continue on...
       for (int j = 0; (j < nDiamonds) && (list[j] + j - 1) < secondMaxIndex; j++) {
-        if (DEBUG) System.out.println("1st: " + list[j] + " to " + list[firstMaxIndex]  + "\n2nd: " + list[nDiamonds - j - 1] + " to " + list[secondMaxIndex] + "");
+        if (DEBUG) System.out.printf(ANSI_BLUE + "[%d]\t[%d]\t%d\t%d\n" + ANSI_RESET, j, nDiamonds - j - 1, list[j], list[nDiamonds - j - 1]);
 
         // Save the last known working indices
         int firstTmp = firstMaxIndex;
         int secondTmp = secondMaxIndex;
 
+        // Base case: if they land on the same index
+        if (j == nDiamonds - j - 1) {
+          // Replace the smaller of the two ranges with the larger one, and check for overlap
+          if (list[firstMaxIndex] > list[secondMaxIndex]) {
+            // Test for overlap
+            if ((list[j] - 1) >= secondMaxIndex) {
+            } else {
+              secondMaxIndex = j;
+            }
+            break;
+          }
+        }
+
+        // if (DEBUG) System.out.printf(ANSI_BLUE + "First temp: %d\tSecd temp: %d\n" + ANSI_RESET, firstTmp, secondTmp);
+
         // See if the current lefthand range is larger than the previously known one
         if (list[j] > list[firstMaxIndex]) {
           firstMaxIndex = j;
-          if (DEBUG) System.out.println("Change 1st max range to " + list[j]);
+          if (DEBUG) System.out.printf(ANSI_GREEN + "[%d]\t[%d]\t%d\t%d\n" + ANSI_RESET, j, nDiamonds - j - 1, list[j], list[nDiamonds - j - 1]);
+        }
+
+        // Make sure the next left doesn't overlap the previous right
+
+        if (DEBUG) System.out.printf(ANSI_CYAN + "Check if out of bounds: %d >= %d\n" + ANSI_RESET, (list[j] + j - 1), secondMaxIndex);
+        if ((list[j] + j - 1) >= secondMaxIndex) {
+          firstMaxIndex = firstTmp;
+          if (DEBUG) System.out.println(ANSI_RED + "Change " + list[j] + " back to " + firstTmp + ANSI_RESET);
         }
 
         // Check to see if the next index largest from the righthand is larger than
         // the one before it
         if (list[nDiamonds - 1 - j] > list[secondMaxIndex]) {
-          secondMaxIndex = j;
-          if (DEBUG) System.out.println("Change 2nd max range to " + list[j]);
+          secondMaxIndex = nDiamonds - j - 1;
+          if (DEBUG) System.out.printf(ANSI_GREEN + "[%d]\t[%d]\t%d\t%d\n" + ANSI_RESET, j, nDiamonds - j - 1, list[j], list[nDiamonds - j - 1]);
         }
 
-        // Make sure that the new ranges do not overlap
-        // If they do, reset the maxes to the old ones, and continue on
+        if (DEBUG) System.out.printf(ANSI_CYAN + "Check if out of bounds: %d >= %d\n" + ANSI_RESET, (list[j] + j - 1), secondMaxIndex);
+        // Make sure the next left doesn't overlap the previous right
         if ((list[j] + j - 1) >= secondMaxIndex) {
-          if (DEBUG) System.out.println("Whooops");
-          firstMaxIndex = firstTmp;
+          if (DEBUG) System.out.println(ANSI_RED + "change " + secondMaxIndex + " back to " + secondTmp + ANSI_RESET);
+          if (DEBUG) System.out.println(ANSI_RED + secondTmp + ANSI_RESET);
           secondMaxIndex = secondTmp;
         }
       }
@@ -131,7 +166,7 @@ public class diamond {
       if (DEBUG) System.out.println("First max: " + list[firstMaxIndex] + "\nSecond max: " + list[secondMaxIndex]);
 
       System.out.println(list[firstMaxIndex] + list[secondMaxIndex]);
-
+      if (DEBUG) System.out.println("-----END CASE-----");
     }
   }
 }
