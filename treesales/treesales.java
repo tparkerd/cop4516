@@ -17,7 +17,6 @@ public class treesales {
       System.out.println("COMPANY " + (i + 1));
       // Create an empty tree to act upon
       root = null;
-
       // Get the number of commands to execute
       int nCommands = Integer.parseInt(stdin.nextLine());
       for (int j = 0; j < nCommands; j++) {
@@ -32,14 +31,17 @@ public class treesales {
           case ADD:
           // Check to see if the we are adding the root
             if (cmd[1].equals(ROOT)) {
+              root = new Person(cmd[1]);
               if (DEBUG) System.out.println("New ROOT: " + cmd[2]);
             }
             else {
               if (DEBUG) System.out.println("New USER: " + cmd[2]);
+              root.add(cmd[1], cmd[2]);
             }
             break;
           case SALE:
             if (DEBUG) System.out.println("New SALE: " + cmd[1] + " sold " + cmd[2]);
+            this.sale()
             break;
           case QUERY:
             if (DEBUG) System.out.println("New QUERY: " + cmd[1]);
@@ -59,14 +61,26 @@ class Person {
   int sales;
   ArrayList<Person> subordinates;
 
-  public Person(String name, Person boss) {
+  public Person(String name) {
     this.name = name;
     this.sales = 0;
-    subordinates = new ArrayList<Person>();
+    this.subordinates = new ArrayList<Person>();
   }
 
-  public void add(String name, String boss) {
-    // Find boss
+  public void add(String boss, String name) {
+    // NOTE(timp): Assume that the tree will always have a CEO
+
+    // See if the current employee is the boss of the new employee
+    // If it is, add them as a subordinate
+    if (this.name.equals(boss)) {
+      this.subordinates.add(new Person(name));
+    // Otherwise, try their subordinates to see if one of them are the boss
+    } else {
+      for (Person sub : this.subordinates) {
+        sub.add(boss, name);
+      }
+    }
+    if (true) System.out.println("Added " + name + " under " + boss);
   }
 
   public void sale(Person p, int amount) {
