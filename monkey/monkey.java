@@ -23,6 +23,11 @@ public class monkey {
       int depth = 0;
 
       do {
+        if (tmp.equals(new String()) && depth == 0) {
+          maxDepth = 0;
+          break;
+        }
+
         if (DEBUG) System.out.println("Depth: " + depth);
         if (DEBUG) System.out.println(tmp);
         if (tmp.charAt(0) == '[')
@@ -38,7 +43,7 @@ public class monkey {
       } while (tmp.length() > 0);
       if (DEBUG) System.out.println(maxDepth);
 
-      System.out.println(Math.pow(2, maxDepth));
+      System.out.println(Math.round(Math.pow(2, maxDepth)));
 
     }
   }
