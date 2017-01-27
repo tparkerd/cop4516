@@ -54,7 +54,7 @@ public class treesales {
   }
 }
 
-class Person implements Comparable<Person> {
+class Person {
   String name;
   int sales;
   ArrayList<Person> subordinates;
@@ -65,44 +65,21 @@ class Person implements Comparable<Person> {
     subordinates = new ArrayList<Person>();
   }
 
-  @Override
-  public int compareTo(Person o) {
-    return 0;
-  }
-
-  public void insert (String name, String boss) {
+  public void add(String name, String boss) {
     // Find boss
   }
 
-  public void makesSale(Person p, int amount) {
+  public void sale(Person p, int amount) {
     p.sales += amount;
   }
 
-  public int totalSales(Person p) {
+  public int query(Person p) {
     int result = 0;
     for (Person sub : p.subordinates) {
-      result += totalSales(sub);
+      result += query(sub);
     }
     return result + p.sales;
   }
 
-  public Person search(Person root, String name) {
-    // Is this a null node
-    if (root == null) return null;
-
-    // Is the current root the person we're looking for?
-    if (root.name.equals(name))
-      return root;
-
-    // Try finding them in the person's subordinates
-    for (Person sub : root.subordinates) {
-      Person tmp = search(sub, name);
-      if (tmp != null)
-        return tmp;
-    }
-
-    // Otherwise, it was never found
-    return null;
-  }
 
 }
