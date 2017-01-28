@@ -48,21 +48,3 @@ public class monkey {
     }
   }
 }
-
-
-
-class Node {
-  Node left;
-  Node right;
-
-  public Node() {
-    this.left = new Node();
-    this.right = new Node();
-  }
-
-  public int height(Node root) {
-    if (root == null)
-      return -1;
-    return 1 + Math.max(height(root.left), height(root.right));
-  }
-}
