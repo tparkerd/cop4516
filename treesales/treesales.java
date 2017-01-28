@@ -31,7 +31,7 @@ public class treesales {
           case ADD:
           // Check to see if the we are adding the root
             if (cmd[1].equals(ROOT)) {
-              root = new Person(cmd[1]);
+              root = new Person(cmd[2]);
               if (DEBUG) System.out.println("New ROOT: " + cmd[2]);
             }
             else {
@@ -41,16 +41,19 @@ public class treesales {
             break;
           case SALE:
             if (DEBUG) System.out.println("New SALE: " + cmd[1] + " sold " + cmd[2]);
-            this.sale()
+            // this.sale();
             break;
           case QUERY:
             if (DEBUG) System.out.println("New QUERY: " + cmd[1]);
+            // Get a reference to the person
+            // TODO(timp): find the person in the hashmap of all employees
+            // Person tmp = root.search()
+            // System.out.println()
             break;
           default:
             if (DEBUG) System.out.println("ERROR. INVALID COMMAND");
             break;
         }
-
       }
     }
   }
@@ -59,11 +62,13 @@ public class treesales {
 class Person {
   String name;
   int sales;
+  Person boss;
   ArrayList<Person> subordinates;
 
   public Person(String name) {
     this.name = name;
     this.sales = 0;
+    this.boss = null; // Maybe use a hash map to look up a reference to this one
     this.subordinates = new ArrayList<Person>();
   }
 
@@ -93,6 +98,13 @@ class Person {
       result += query(sub);
     }
     return result + p.sales;
+  }
+
+  public void hashAdd(String boss, String name) {
+    // Check to see if boss is null, if so, that means it's the CEO
+    if (boss.equals(new String())) {
+
+    }
   }
 
 
