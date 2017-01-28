@@ -41,7 +41,7 @@ public class treesales {
             // If null, that means this is the CEO
             if (boss == null) {
               if (DEBUG) System.out.println("Create CEO");
-              root = new Person(cmd[2]);
+              root = new Person(null, cmd[2]);
               myHash.put(root.name, root);
             // Otherwise, this is a normal employee, so just add them
             // under the correct boss and get there address to hash back
@@ -80,13 +80,6 @@ class Person {
   Person boss;
   ArrayList<Person> subordinates;
 
-  public Person(String name) {
-    this.name = name;
-    this.sales = 0;
-    this.boss = null; // Maybe use a hash map to look up a reference to this one
-    this.subordinates = new ArrayList<Person>();
-  }
-
   public Person(Person boss, String name) {
     this.name = name;
     this.sales = 0;
@@ -99,11 +92,9 @@ class Person {
     // TODO(timp): see if they are already in the hash map
 
     // Create a new person
-    Person tmp = new Person(boss, name);
+    Person tmp = new Person(this, name);
     // Hire them under the current person
     this.subordinates.add(tmp);
-    // Set the current person as the newly hired person's boss
-    tmp.boss = this;
 
     // Return a reference to the newly created person
     return tmp;
