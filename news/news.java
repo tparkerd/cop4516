@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Collections;
 import java.util.Arrays;
 
-
-
 public class news {
 
   public static final String ANSI_RESET = "\u001B[0m";
@@ -50,24 +48,12 @@ public class news {
 
 class Person {
 
-  public static final String ANSI_RESET = "\u001B[0m";
-  public static final String ANSI_BLACK = "\u001B[30m";
-  public static final String ANSI_RED = "\u001B[31m";
-  public static final String ANSI_GREEN = "\u001B[32m";
-  public static final String ANSI_YELLOW = "\u001B[33m";
-  public static final String ANSI_BLUE = "\u001B[34m";
-  public static final String ANSI_PURPLE = "\u001B[35m";
-  public static final String ANSI_CYAN = "\u001B[36m";
-  public static final String ANSI_WHITE = "\u001B[37m";
-
   int id;
   Person boss;
-  int callTime;
   ArrayList<Person> subordinates;
 
   public Person(int id) {
     this.id = id;
-    this.callTime = 0;
     this.boss = null;
     this.subordinates = new ArrayList<Person>();
   }
@@ -75,15 +61,6 @@ class Person {
   public void hires(Person p) {
     this.subordinates.add(p);
     p.boss = this;
-    this.callTime++;
-    if (news.DEBUG) System.out.println(p.toString());
-  }
-
-  public void callUpdate() {
-    if (this != null) {
-      this.callTime++;
-      this.boss.callUpdate();
-    }
   }
 
   public int minCallTime() {
