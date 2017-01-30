@@ -6,15 +6,6 @@ import java.util.Arrays;
 
 public class news {
 
-  public static final String ANSI_RESET = "\u001B[0m";
-  public static final String ANSI_BLACK = "\u001B[30m";
-  public static final String ANSI_RED = "\u001B[31m";
-  public static final String ANSI_GREEN = "\u001B[32m";
-  public static final String ANSI_YELLOW = "\u001B[33m";
-  public static final String ANSI_BLUE = "\u001B[34m";
-  public static final String ANSI_PURPLE = "\u001B[35m";
-  public static final String ANSI_CYAN = "\u001B[36m";
-  public static final String ANSI_WHITE = "\u001B[37m";
   public static final boolean DEBUG = true;
   public static HashMap<Integer, Person> myHash;
 
@@ -46,15 +37,17 @@ public class news {
 }
 
 
-class Person {
+class Person implements Comparable<Person> {
 
   int id;
   Person boss;
+  int callTime;
   ArrayList<Person> subordinates;
 
   public Person(int id) {
     this.id = id;
     this.boss = null;
+    this.callTime = 0;
     this.subordinates = new ArrayList<Person>();
   }
 
@@ -64,7 +57,46 @@ class Person {
   }
 
   public int minCallTime() {
-    return 0;
+    if (this.subordinates.size() <= 0) return 0;
+    ArrayList<Person> sub = this.subordinates;
+    int n = sub.size();
+
+    // We have some subordinates, let's find the max time it takes for each
+    // of them to inform their own subordinates
+    Integer[] list = new Integer[n];
+    for (int i = 0; i < n; i++) {
+      list[i] = sub.get(i).minCallTime();
+    }
+
+    // Sort them from greater time to wait to least
+    Arrays.sort(list, Collections.reverseOrder());
+
+    // Increment those times by the time it would take for the current
+    // person to inform the subordinates that take more time first
+    for (int i = 0; i < n; i++) {
+      list[i] += i + 1;
+    }
+
+    // Since there could have been several subordinates with the same
+    // call time waiting longer, they may be greater now
+    // make sure they are the actual max
+    int max = 0;
+    for (int i = 0; i < list.length; i++) {
+      if (list[i] > max)
+        max = list[i];
+    }
+
+    return max;
+  }
+
+  @Override
+  public int compareTo(Person p) {
+    if (this.callTime > p.callTime)
+      return 1;
+    else if (this.callTime < p.callTime)
+      return -1;
+    else
+      return 0;
   }
 
   @Override
