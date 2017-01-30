@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 public class news {
 
-    public static final String ANSI_RESET = "\u001B[0m";
+  public static final String ANSI_RESET = "\u001B[0m";
   public static final String ANSI_BLACK = "\u001B[30m";
   public static final String ANSI_RED = "\u001B[31m";
   public static final String ANSI_GREEN = "\u001B[32m";
@@ -27,8 +27,6 @@ public class news {
     // For each case...
     int nCases = stdin.nextInt();
     for (int i = 0; i < nCases; i++) {
-      if (DEBUG) System.out.println("CASE #" + (i + 1));
-      if (DEBUG) System.out.printf(" BOSS\tHIREE\n");
       // Make the CEO, the boss, me!
       // Store a quick reference to my 'pointer'
       Person root = new Person(0);
@@ -41,22 +39,18 @@ public class news {
         // Store a quick reference
         myHash.put(j, tmp);
         // Assign their boss
-        int bossId = stdin.nextInt();
-        Person boss = myHash.get(bossId);
+        Person boss = myHash.get(stdin.nextInt());
         boss.hires(tmp);
       }
-      if (news.DEBUG) System.out.println();
-      if (news.DEBUG) System.out.println("\tID\tMAX\tSUM");
       System.out.println(root.minCallTime());
     }
   }
 }
 
 
-class Person implements Comparable<Person> {
+class Person {
 
-
-    public static final String ANSI_RESET = "\u001B[0m";
+  public static final String ANSI_RESET = "\u001B[0m";
   public static final String ANSI_BLACK = "\u001B[30m";
   public static final String ANSI_RED = "\u001B[31m";
   public static final String ANSI_GREEN = "\u001B[32m";
@@ -93,44 +87,7 @@ class Person implements Comparable<Person> {
   }
 
   public int minCallTime() {
-    if (news.DEBUG) System.out.printf(ANSI_RED + "Call:   %d\n" + ANSI_RESET, this.id);
-    // If I have no subordinates, it just takes a minute to inform me
-    if (this.subordinates == null) return 0;
-
-    // Get the call time for each of my subordinates
-    int[] list = new int[this.subordinates.size()];
-
-    // For each subordinate...
-    for (int i = 0; i < this.subordinates.size(); i++) {
-      // Get the call time without maxes
-      list[i] = this.subordinates.get(i).minCallTime();
-    }
-
-    if (news.DEBUG) System.out.println("Raw " + Arrays.toString(list));
-
-    // Sort the subordinates
-    Arrays.sort(list);
-    if (news.DEBUG) System.out.println("Sorted " + Arrays.toString(list));
-
-    // Increment by how long each subordinate has to wait to be called by its boss
-    for (int i = 0; i < list.length; i++) {
-      list[i] += (i + 1);
-    }
-
-    Arrays.sort(list);
-
-    return list[0];
-  }
-
-  @Override
-  public int compareTo(Person p) {
-    int thisMin = this.minCallTime();
-    int thatMin = p.minCallTime();
-    if (thisMin > thatMin)
-      return 1;
-    else if (thisMin < thatMin)
-      return -1;
-    else return 0;
+    return 0;
   }
 
   @Override
