@@ -37,23 +37,18 @@ public class news {
 }
 
 
-class Person implements Comparable<Person> {
+class Person{
 
   int id;
-  Person boss;
-  int callTime;
   ArrayList<Person> subordinates;
 
   public Person(int id) {
     this.id = id;
-    this.boss = null;
-    this.callTime = 0;
     this.subordinates = new ArrayList<Person>();
   }
 
   public void hires(Person p) {
     this.subordinates.add(p);
-    p.boss = this;
   }
 
   public int minCallTime() {
@@ -87,20 +82,5 @@ class Person implements Comparable<Person> {
     }
 
     return max;
-  }
-
-  @Override
-  public int compareTo(Person p) {
-    if (this.callTime > p.callTime)
-      return 1;
-    else if (this.callTime < p.callTime)
-      return -1;
-    else
-      return 0;
-  }
-
-  @Override
-  public String toString() {
-    return new String("  " + this.boss.id + "\t  " + this.id);
   }
 }
