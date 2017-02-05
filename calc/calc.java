@@ -16,10 +16,8 @@ public class calc {
   public static final String ANSI_CYAN = "\u001B[36m";
   public static final String ANSI_WHITE = "\u001B[37m";
   public static final boolean DEBUG = true;
-  public static final int MAX_VALUE = 40;
+  public static final int MAX_VALUE = 10;
   public static Datum data;
-  public static final int callLimit = 100;
-  public static int counter = 0;
 
   public static void main(String[] args) {
 
@@ -65,19 +63,14 @@ public class calc {
 
     // The actual BFS
     while(nVisited < MAX_VALUE - 1) {
+      if (DEBUG) System.out.println("\n-------------------\nQueue             |\n-------------------");
       for(Pair str : q) {
         if (DEBUG) System.out.println(str.toString());
-}
+      }
 
       // Get next item and its neighbors
       Pair p = q.poll();
-      if (counter >= callLimit)
-        return max;
-      counter++;
-      if (p == null) {
-        return max;
-      }
-      if (DEBUG) System.out.println("Next value to try: " + p.toString());
+      if (DEBUG) System.out.println(ANSI_GREEN + "Dequeue: " + p.toString() + ANSI_RESET);
       ArrayList<Integer> next = getNext(p.value);
       if (DEBUG) System.out.println("neighbors: " + next.toString());
 
@@ -85,17 +78,11 @@ public class calc {
       for (int i = 0; i < next.size(); i++) {
         // Get the next case (add, divide, or multiply)
         int item = next.get(i);
-
-        // Item is in range, process it
-        if (DEBUG) System.out.println("Testing item!" + item);
+        if (DEBUG) System.out.println("Got neighbor: " + item);
 
         // Although this will be heavily nested, it will let me use very specific debug statements
         if (item <= 0) {
           if (DEBUG) System.out.println(ANSI_RED + item + " is NOT greater than 0." + ANSI_RESET);
-          if (item == 0) {
-            // We found a path
-            return p.distance;
-          }
           if (item >= MAX_VALUE) {
             if (DEBUG) System.out.println(ANSI_RED + item + " exceeds max (" + MAX_VALUE + ")" + ANSI_RESET);
             if (visited[item] != -1) {
@@ -111,6 +98,9 @@ public class calc {
           max = visited[item];
         }
       }
+      if (DEBUG) System.out.println("\n-------------------\nVisited           |\n-------------------");
+      if (DEBUG) System.out.println(Arrays.toString(visited));
+
     }
     return max;
   }
