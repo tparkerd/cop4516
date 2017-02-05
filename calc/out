@@ -1,0 +1,83 @@
+Data: 1 3 2
+Input: 5
+5 (0)
+Next value to try: 5 (0)
+neighbors: [6, 2, 15]
+Testing item!6
+Testing item!2
+Testing item!15
+6 (1)
+2 (1)
+15 (1)
+Next value to try: 6 (1)
+neighbors: [7, 3, 18]
+Testing item!7
+Testing item!3
+Testing item!18
+2 (1)
+15 (1)
+7 (2)
+3 (2)
+18 (2)
+Next value to try: 2 (1)
+neighbors: [3, 1, 6]
+Testing item!3
+Testing item!1
+Testing item!6
+15 (1)
+7 (2)
+3 (2)
+18 (2)
+1 (2)
+Next value to try: 15 (1)
+neighbors: [16, 7, 5]
+Testing item!16
+Testing item!7
+Testing item!5
+7 (2)
+3 (2)
+18 (2)
+1 (2)
+16 (2)
+Next value to try: 7 (2)
+neighbors: [8, 3, 21]
+Testing item!8
+Testing item!3
+Testing item!21
+3 (2)
+18 (2)
+1 (2)
+16 (2)
+8 (3)
+21 (3)
+Next value to try: 3 (2)
+neighbors: [4, 1, 9]
+Testing item!4
+Testing item!1
+Testing item!9
+18 (2)
+1 (2)
+16 (2)
+8 (3)
+21 (3)
+4 (3)
+9 (3)
+Next value to try: 18 (2)
+neighbors: [19, 9, 14]
+Testing item!19
+Testing item!9
+Testing item!14
+1 (2)
+16 (2)
+8 (3)
+21 (3)
+4 (3)
+9 (3)
+19 (3)
+14 (3)
+Next value to try: 1 (2)
+neighbors: [2, 0, 3]
+Testing item!2
+Testing item!0
+[31m0 is NOT greater than 0.[0m
+5	15
