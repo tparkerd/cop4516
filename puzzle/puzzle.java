@@ -1,10 +1,4 @@
-import java.util.Scanner;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.HashSet;
-import java.util.Collections;
-import java.util.Arrays;
+import java.util.*;
 
 public class puzzle {
   public static final String ANSI_RESET = "\u001B[0m";
@@ -20,8 +14,10 @@ public class puzzle {
   public static final boolean DEBUG = true;
   public static final int SIZE = 9;
   public static final long SOLVED_STATE = 4886718336L;
+  public static final int[] DX = {0,-1,0,1};
+  public static final int[] DY = {1,0,-1,0};
 
-  public static HashSet<sPair> solutionSet;
+  public static HashSet<Pair> solutionSet;
 
 
   public static void main(String[] args) {
@@ -31,10 +27,10 @@ public class puzzle {
     int nCases = stdin.nextInt();
 
     // Record all solutions
-    solutionSet = new HashSet<sPair>();
+    solutionSet = new HashSet<Pair>();
 
     // Automatically insert the first solution
-    solutionSet.add(new sPair(new State(SOLVED_STATE), 0));
+    // solutionSet.add(new Long(new State(SOLVED_STATE), 0));
 
     for (int i = 0; i < nCases; i++) {
       // Get the board
@@ -44,98 +40,143 @@ public class puzzle {
       for (int j = 0; j < SIZE; j++)
         startingBoard = (startingBoard << 4) + stdin.nextInt();
 
-      // Create the starting state of the board
-      State tmpState = new State(tmp);
+      if (DEBUG) System.out.println(startingBoard);
+
+      long[][] board = toBoard(startingBoard);
 
       // Debug preview of the board
-      if (DEBUG) tmpState.view();
+      if (DEBUG) displayBoard(board);
 
-      // // Create a queue to run the BFS on
-      // Queue<sPair> q = new LinkedList<sPair>();
-      //
-      // q.add(new sPair(tmpState, 0));
-      //
-      // sPair p = q.poll();
+      // Create a queue to run the BFS on
+      Queue<Pair> q = new LinkedList<Pair>();
 
-      // while (!p.state.isSolved() && !q.isEmpty()) {
-      //
-      //   p = q.poll();
-      //   ArrayList<State> next = p.state.getNextMoves();
-      //
-      //   // Try to enqueue
-      //   for (int k = 0; k < next.size(); k++) {
-      //     // Get the next case (add, divide, or multiply)
-      //     State item = next.get(k);
-      //
-      //     // Make sure that item is in bounds and not yet visited
-      //     if (!solutionSet.contains(item)) {
-      //       item.distance = p.distance + 1;
-      //       q.add(new sPair(item, item.distance));
-      //     }
-      //   }
-      // }
+      q.add(new Pair(startingBoard, 0));
 
+      while (!q.isEmpty()) {
+        Pair p = q.poll();
+        ArrayList<Pair> next = getNext(p);
+        if (DEBUG) System.out.println(p);
 
+        // Try to enqueue
+        for (int k = 0; k < next.size(); k++) {
+          // Get the next case (add, divide, or multiply)
+          Pair item = next.get(k);
+
+          // Make sure that item is in bounds and not yet visited
+          if (!solutionSet.contains(item)) {
+            item.distance = p.distance + 1;
+            q.add(new Pair(item.stateId, item.distance));
+          }
+        }
+      }
       // We know it is solved when it is in the correct
-      if(tmpState.isSolved())
-        System.out.println("Solved!");
-      else
-        System.out.println("Not solved yet.");
-    }
-
-  }
-}
-
-class State {
-  public long id;
-  public long[][] board;
-  public int distance;
-
-
-  public State(long l) {
-    // Save ID hash value
-    this.id = l;
-    if (puzzle.DEBUG) System.out.println(this.id);
-
-    this.distance = 0;
-
-    // Convert this to actual board
-    board = new long[3][3];
-
-    long[] tmp = new long[puzzle.SIZE];
-    for (int i = 0; i < puzzle.SIZE; i++)
-      tmp[puzzle.SIZE - 1 - i] = 0xF & (this.id >> (i * 4));
-
-    tmp = reverse(tmp);
-
-    for (int i = 0; i < puzzle.SIZE; i++) {
-      int row = i / 3;
-      int col = i % 3;
-      this.board[row][col] = tmp[puzzle.SIZE - 1 - i];
+      // if(tmpState.isSolved())
+      //   System.out.println("Solved!");
+      // else
+      //   System.out.println("Not solved yet.");
     }
   }
 
-  // Debug display of the board
-  public void view() {
+  public static ArrayList<Pair> getNext(Pair p) {
+    // Result variable to always be returned
+    ArrayList<Pair> list = new ArrayList<Pair>();
+
+    // Get a more manageable version of the board
+    long[][] board = toBoard(p.stateId);
+
+    // Find the position of ZERO
+    int zeroRow = -1, zeroCol = -1;
     for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
-        System.out.print(this.board[i][j] + " ");
+        if (board[i][j] == 0) {
+          zeroRow = i;
+          zeroCol = j;
+        }
+      }
+    }
+
+    if (DEBUG) System.out.println("Zero is at (" + zeroRow + ", " + zeroCol + ")");
+    if (zeroRow == -1 || zeroCol == -1)
+      System.out.println(ANSI_RED + "Zero was not found on the board" + ANSI_RESET);
+
+    // For each of the possible moves
+    for (int j = 0; j < DY.length; j++) {
+      for (int i = 0; i < DX.length; i++) {
+        // Create tmp board to make moves on
+        long[][] tmpBoard = toBoard(p.stateId);
+        // Check bounds for next move
+        if (((DY[j] + zeroRow) >= 0 ) && // Not above of the board
+            ((DY[j] + zeroRow) <= 2 ) && // Not below the board
+            ((DY[j] + zeroRow) >= 0 ) && // Not left of the board
+            ((DY[j] + zeroRow) <= 2)     // Not right of the board
+          )
+          // Make the move on a temp copy of the board, and then add its pair to list of upcoming moves
+        {
+          if (DEBUG) System.out.println(ANSI_GREEN + "Move is inboundds" + ANSI_RESET);
+          // Make the next move by swapping ZERO and the value that's in bounds
+          long tmp = tmpBoard[DY[j] + zeroRow][DX[i] + zeroCol];
+          tmpBoard[DY[j] + zeroRow][DX[i] + zeroCol] = 0;
+          tmpBoard[zeroRow][zeroCol] = tmp;
+
+          // Get its id value
+          long tmpId = toId(tmpBoard);
+          // Add it to the next possible moves
+          list.add(new Pair(tmpId, p.distance + 1));
+        }
+      }
+    }
+
+
+    return list;
+  }
+
+  public static long[][] toBoard(long id) {
+    // Temporary board to always return
+    long[][] board = new long[3][3];
+
+    // Value to hold the each 4 bits that make up the id number
+    long[] list = new long[SIZE];
+    // Parse out each of the values into the list
+    for (int i = 0; i < SIZE; i++)
+      list[SIZE - 1 - i] = 0xF & (id >> (i * 4));
+
+    // Because the bits are read in backwards, we need to reverse them
+    list = reverse(list);
+
+    // Insert each of the values into their appropriate slots
+    for (int i = 0; i < SIZE; i++) {
+      //     ROW    COL
+      board[i / 3][i % 3] = list[SIZE - 1 - i];
+    }
+    return board;
+  }
+
+  public static long toId(long[][] b) {
+    // Temporary id to always return
+    long id = 0;
+
+    // For each element, get the value, add it to the id and shift up by 4
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        id = id << 4;
+        id += b[i][j];
+      }
+    }
+    return id;
+  }
+
+  public static void displayBoard(long[][] board) {
+    System.out.println("\nCurrent state\n-----");
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        System.out.print(board[i][j] + " ");
       }
       System.out.println();
     }
+    System.out.println("-----");
   }
 
-  public ArrayList<State> getNextMoves() {
-    ArrayList<State> result = new ArrayList<State>();
-    // Figure out which are the next valid moves to enqueue
-
-
-
-
-    return result;
-  }
-
-  public long[] reverse(long [] a) {
+  public static long[] reverse(long [] a) {
     for (int i = 0; i < (a.length - 1) / 2; i++) {
       long tmp = a[i];
       a[i] = a[a.length - i - 1];
@@ -143,23 +184,21 @@ class State {
     }
     return a;
   }
-
-  public boolean isSolved() {
-    return (this.id == puzzle.SOLVED_STATE);
-  }
 }
 
-class sPair {
-  State state;
-  int distance;
+class Pair {
+  public long stateId;
+  public int distance;
 
-  public sPair(State s, int d) {
-    this.state = s;
+  public Pair(long v, int d) {
+    this.stateId = v;
     this.distance = d;
   }
 
   @Override
   public String toString() {
-    return this.state.id + " ( " + this.state.distance + ")";
+    long[][] tmp = puzzle.toBoard(this.stateId);
+    puzzle.displayBoard(tmp);
+    return this.stateId + " (" + this.distance + ")";
   }
 }
