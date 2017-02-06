@@ -3,6 +3,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.HashSet;
+import java.util.Collections;
+import java.util.Arrays;
 
 public class puzzle {
   public static final String ANSI_RESET = "\u001B[0m";
@@ -38,9 +40,9 @@ public class puzzle {
       // Get the board
       // Since the values are only up to 8, I should be able to store them in just 4 bits
       // Read in the initial state of the board
-      long tmp = 0;
+      long startingBoard = 0;
       for (int j = 0; j < SIZE; j++)
-        tmp = (tmp << 4) + stdin.nextInt();
+        startingBoard = (startingBoard << 4) + stdin.nextInt();
 
       // Create the starting state of the board
       State tmpState = new State(tmp);
@@ -48,30 +50,32 @@ public class puzzle {
       // Debug preview of the board
       if (DEBUG) tmpState.view();
 
-      // Create a queue to run the BFS on
-      Queue<sPair> q = new LinkedList<sPair>();
+      // // Create a queue to run the BFS on
+      // Queue<sPair> q = new LinkedList<sPair>();
+      //
+      // q.add(new sPair(tmpState, 0));
+      //
+      // sPair p = q.poll();
 
-      q.add(new sPair(tmpState, 0));
+      // while (!p.state.isSolved() && !q.isEmpty()) {
+      //
+      //   p = q.poll();
+      //   ArrayList<State> next = p.state.getNextMoves();
+      //
+      //   // Try to enqueue
+      //   for (int k = 0; k < next.size(); k++) {
+      //     // Get the next case (add, divide, or multiply)
+      //     State item = next.get(k);
+      //
+      //     // Make sure that item is in bounds and not yet visited
+      //     if (!solutionSet.contains(item)) {
+      //       item.distance = p.distance + 1;
+      //       q.add(new sPair(item, item.distance));
+      //     }
+      //   }
+      // }
 
-      sPair p = q.poll();
 
-      while (!p.state.isSolved() && !q.isEmpty()) {
-
-        p = q.poll();
-        ArrayList<State> next = p.state.getNextMoves();
-
-        // Try to enqueue
-        for (int k = 0; k < next.size(); k++) {
-          // Get the next case (add, divide, or multiply)
-          State item = next.get(k);
-
-          // Make sure that item is in bounds and not yet visited
-          if (!solutionSet.contains(item)) {
-            item.distance = p.distance + 1;
-            q.add(new sPair(item, item.distance));
-          }
-        }
-      }
       // We know it is solved when it is in the correct
       if(tmpState.isSolved())
         System.out.println("Solved!");
@@ -98,33 +102,27 @@ class State {
     // Convert this to actual board
     board = new long[3][3];
 
-
-    // NOTE(timp): hard coding it for now b/c it's too late to be clever
     long[] tmp = new long[puzzle.SIZE];
-    for (int i = 0; i < puzzle.SIZE; i++) {
+    for (int i = 0; i < puzzle.SIZE; i++)
       tmp[puzzle.SIZE - 1 - i] = 0xF & (this.id >> (i * 4));
+
+    tmp = reverse(tmp);
+
+    for (int i = 0; i < puzzle.SIZE; i++) {
+      int row = i / 3;
+      int col = i % 3;
+      this.board[row][col] = tmp[puzzle.SIZE - 1 - i];
     }
-    board[0][0] = tmp[0];
-    board[0][1] = tmp[1];
-    board[0][2] = tmp[2];
-    board[1][0] = tmp[3];
-    board[1][1] = tmp[4];
-    board[1][2] = tmp[5];
-    board[2][0] = tmp[6];
-    board[2][1] = tmp[7];
-    board[2][2] = tmp[8];
   }
 
   // Debug display of the board
   public void view() {
-    long[] tmp = new long[puzzle.SIZE];
-    for (int i = 0; i < puzzle.SIZE; i++) {
-      tmp[puzzle.SIZE - 1 - i] = 0xF & (this.id >> (i * 4));
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        System.out.print(this.board[i][j] + " ");
+      }
+      System.out.println();
     }
-    System.out.printf("[%d][%d][%d]\n[%d][%d][%d]\n[%d][%d][%d]\n",
-                        tmp[0], tmp[1], tmp[2],
-                        tmp[3], tmp[4], tmp[5],
-                        tmp[6], tmp[7], tmp[8]);
   }
 
   public ArrayList<State> getNextMoves() {
@@ -133,7 +131,17 @@ class State {
 
 
 
+
     return result;
+  }
+
+  public long[] reverse(long [] a) {
+    for (int i = 0; i < (a.length - 1) / 2; i++) {
+      long tmp = a[i];
+      a[i] = a[a.length - i - 1];
+      a[a.length - i - 1] = tmp;
+    }
+    return a;
   }
 
   public boolean isSolved() {
