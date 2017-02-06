@@ -1,17 +1,6 @@
 import java.util.*;
 
 public class puzzle {
-  public static final String ANSI_RESET = "\u001B[0m";
-  public static final String ANSI_BLACK = "\u001B[30m";
-  public static final String ANSI_RED = "\u001B[31m";
-  public static final String ANSI_GREEN = "\u001B[32m";
-  public static final String ANSI_YELLOW = "\u001B[33m";
-  public static final String ANSI_BLUE = "\u001B[34m";
-  public static final String ANSI_PURPLE = "\u001B[35m";
-  public static final String ANSI_CYAN = "\u001B[36m";
-  public static final String ANSI_WHITE = "\u001B[37m";
-
-  public static final boolean DEBUG = false;
   public static final int SIZE = 9;
   public static final long SOLVED_STATE = 4886718336L;
   public static final int[] DX = {0,-1,0,1};
@@ -40,15 +29,12 @@ public class puzzle {
       Pair p = q.poll();
       solutionSet.put(p.stateId, p.distance);
 
-      if (DEBUG) System.out.println(p);
       ArrayList<Pair> next = getNext(p);
 
       // Try to enqueue
       for (int k = 0; k < next.size(); k++) {
         // Get the next case (add, divide, or multiply)
         Pair item = next.get(k);
-
-        if (solutionSet.containsKey(item.stateId) && DEBUG) System.out.println(ANSI_RED + "Solution already in hashset" + ANSI_RESET);
 
         // Make sure that item is in bounds and not yet visited
         if (!solutionSet.containsKey(item.stateId)) {
@@ -71,7 +57,6 @@ public class puzzle {
       System.out.println(solutionSet.get(boardInQuestion));
     }
   }
-
   public static ArrayList<Pair> getNext(Pair p) {
     // Result variable to always be returned
     ArrayList<Pair> list = new ArrayList<Pair>();
@@ -102,7 +87,6 @@ public class puzzle {
           )
           // Make the move on a temp copy of the board, and then add its pair to list of upcoming moves
         {
-          if (DEBUG) System.out.println(ANSI_GREEN + "Move is inbounds" + ANSI_RESET);
           // Make the next move by swapping ZERO and the value that's in bounds
           long tmp = tmpBoard[DY[i] + zeroRow][DX[i] + zeroCol];
           tmpBoard[DY[i] + zeroRow][DX[i] + zeroCol] = 0;
@@ -114,8 +98,6 @@ public class puzzle {
           list.add(new Pair(tmpId, p.distance + 1));
         }
     }
-
-
     return list;
   }
 

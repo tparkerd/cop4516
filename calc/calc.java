@@ -25,10 +25,10 @@ public class calc {
 
         // Get the target answer
         target = stdin.nextInt();
-        int[] solutions = new int[MAX_VALUE];
-
         // Get all the solutions for this case
-        solutions = solveBFS(0);
+        int[] solutions = solveBFS(0);
+
+        System.out.println(Arrays.toString(solutions));
 
         // Display the answer
         System.out.println(solutions[target]);
@@ -38,7 +38,7 @@ public class calc {
 
   public static int[] solveBFS(int s) {
     // Nothing has been visited
-    int[] visited = new int[MAX_VALUE];
+    int[] visited = new int[MAX_VALUE + 1];
     Arrays.fill(visited, -1);
 
     // Make a queuehuehuehue
@@ -50,11 +50,8 @@ public class calc {
     // There is not distance from the starting point
     visited[s] = 0;
 
-    int nVisited = 1;
-
     // The actual BFS
-    while(nVisited < MAX_VALUE - 1 & !q.isEmpty()) {
-
+    while(!q.isEmpty()) {
       // Get next item and its neighbors
       Pair p = q.poll();
       ArrayList<Integer> next = getNext(p.value);
@@ -65,11 +62,10 @@ public class calc {
         int item = next.get(i);
 
         // Make sure that item is in bounds and not yet visited
-        if (item > 0 && item < MAX_VALUE && visited[item] == -1) {
+        if (visited[item] == -1) {
           visited[item] = p.distance + 1;
           if(item == target) return visited;
           q.add(new Pair(item, visited[item]));
-          nVisited++;
         }
       }
     }
