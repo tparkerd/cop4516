@@ -11,11 +11,12 @@ public class puzzle {
   public static final String ANSI_CYAN = "\u001B[36m";
   public static final String ANSI_WHITE = "\u001B[37m";
 
-  public static final boolean DEBUG = true;
+  public static final boolean DEBUG = false;
   public static final int SIZE = 9;
   public static final long SOLVED_STATE = 4886718336L;
   public static final int[] DX = {0,-1,0,1};
   public static final int[] DY = {1,0,-1,0};
+  public static boolean solved;
 
   public static HashSet<Pair> solutionSet;
 
@@ -36,26 +37,30 @@ public class puzzle {
       // Get the board
       // Since the values are only up to 8, I should be able to store them in just 4 bits
       // Read in the initial state of the board
+
       long startingBoard = 0;
       for (int j = 0; j < SIZE; j++)
         startingBoard = (startingBoard << 4) + stdin.nextInt();
 
-      if (DEBUG) System.out.println(startingBoard);
-
       long[][] board = toBoard(startingBoard);
-
-      // Debug preview of the board
-      if (DEBUG) displayBoard(board);
 
       // Create a queue to run the BFS on
       Queue<Pair> q = new LinkedList<Pair>();
 
       q.add(new Pair(startingBoard, 0));
+      int nMovesMade = 0;
 
-      while (!q.isEmpty()) {
+      solved = false;
+      while (!solved) {
         Pair p = q.poll();
-        ArrayList<Pair> next = getNext(p);
+        solutionSet.add(p);
+        // Check if it's the solution state
+        if (p.stateId == SOLVED_STATE) {
+            nMovesMade = p.distance;
+            break;
+        }
         if (DEBUG) System.out.println(p);
+        ArrayList<Pair> next = getNext(p);
 
         // Try to enqueue
         for (int k = 0; k < next.size(); k++) {
@@ -66,14 +71,12 @@ public class puzzle {
           if (!solutionSet.contains(item)) {
             item.distance = p.distance + 1;
             q.add(new Pair(item.stateId, item.distance));
+            nMovesMade++;
           }
         }
       }
       // We know it is solved when it is in the correct
-      // if(tmpState.isSolved())
-      //   System.out.println("Solved!");
-      // else
-      //   System.out.println("Not solved yet.");
+      System.out.println(ANSI_GREEN + nMovesMade + ANSI_RESET);
     }
   }
 
@@ -100,22 +103,21 @@ public class puzzle {
       System.out.println(ANSI_RED + "Zero was not found on the board" + ANSI_RESET);
 
     // For each of the possible moves
-    for (int j = 0; j < DY.length; j++) {
-      for (int i = 0; i < DX.length; i++) {
+    for (int i = 0; i < DY.length; i++) {
         // Create tmp board to make moves on
         long[][] tmpBoard = toBoard(p.stateId);
         // Check bounds for next move
-        if (((DY[j] + zeroRow) >= 0 ) && // Not above of the board
-            ((DY[j] + zeroRow) <= 2 ) && // Not below the board
-            ((DY[j] + zeroRow) >= 0 ) && // Not left of the board
-            ((DY[j] + zeroRow) <= 2)     // Not right of the board
+        if (((DY[i] + zeroRow) >= 0 ) && // Not above of the board
+            ((DY[i] + zeroRow) <= 2 ) && // Not below the board
+            ((DX[i] + zeroCol) >= 0 ) && // Not left of the board
+            ((DX[i] + zeroCol) <= 2)     // Not right of the board
           )
           // Make the move on a temp copy of the board, and then add its pair to list of upcoming moves
         {
           if (DEBUG) System.out.println(ANSI_GREEN + "Move is inboundds" + ANSI_RESET);
           // Make the next move by swapping ZERO and the value that's in bounds
-          long tmp = tmpBoard[DY[j] + zeroRow][DX[i] + zeroCol];
-          tmpBoard[DY[j] + zeroRow][DX[i] + zeroCol] = 0;
+          long tmp = tmpBoard[DY[i] + zeroRow][DX[i] + zeroCol];
+          tmpBoard[DY[i] + zeroRow][DX[i] + zeroCol] = 0;
           tmpBoard[zeroRow][zeroCol] = tmp;
 
           // Get its id value
@@ -123,7 +125,6 @@ public class puzzle {
           // Add it to the next possible moves
           list.add(new Pair(tmpId, p.distance + 1));
         }
-      }
     }
 
 
