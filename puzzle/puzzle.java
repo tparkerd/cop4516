@@ -11,7 +11,7 @@ public class puzzle {
   public static final String ANSI_CYAN = "\u001B[36m";
   public static final String ANSI_WHITE = "\u001B[37m";
 
-  public static final boolean DEBUG = false;
+  public static final boolean DEBUG = true;
   public static final int SIZE = 9;
   public static final long SOLVED_STATE = 4886718336L;
   public static final int[] DX = {0,-1,0,1};
@@ -31,7 +31,7 @@ public class puzzle {
     solutionSet = new HashSet<Pair>();
 
     // Automatically insert the first solution
-    // solutionSet.add(new Long(new State(SOLVED_STATE), 0));
+    solutionSet.add(new Pair(SOLVED_STATE, 0));
 
     for (int i = 0; i < nCases; i++) {
       // Get the board
@@ -54,10 +54,13 @@ public class puzzle {
       while (!solved) {
         Pair p = q.poll();
         solutionSet.add(p);
+
         // Check if it's the solution state
         if (p.stateId == SOLVED_STATE) {
-            nMovesMade = p.distance;
-            break;
+          if (DEBUG) System.out.println(ANSI_RED + "FOUND SOLUTION" + ANSI_RESET);
+          displayBoard(toBoard(p.stateId));
+          nMovesMade = p.distance;
+          break;
         }
         if (DEBUG) System.out.println(p);
         ArrayList<Pair> next = getNext(p);
@@ -67,11 +70,12 @@ public class puzzle {
           // Get the next case (add, divide, or multiply)
           Pair item = next.get(k);
 
+          if (solutionSet.contains(item)) System.out.println(ANSI_RED + "Solution already in hashset" + ANSI_RESET);
+
           // Make sure that item is in bounds and not yet visited
           if (!solutionSet.contains(item)) {
             item.distance = p.distance + 1;
             q.add(new Pair(item.stateId, item.distance));
-            nMovesMade++;
           }
         }
       }
@@ -98,10 +102,6 @@ public class puzzle {
       }
     }
 
-    if (DEBUG) System.out.println("Zero is at (" + zeroRow + ", " + zeroCol + ")");
-    if (zeroRow == -1 || zeroCol == -1)
-      System.out.println(ANSI_RED + "Zero was not found on the board" + ANSI_RESET);
-
     // For each of the possible moves
     for (int i = 0; i < DY.length; i++) {
         // Create tmp board to make moves on
@@ -114,7 +114,7 @@ public class puzzle {
           )
           // Make the move on a temp copy of the board, and then add its pair to list of upcoming moves
         {
-          if (DEBUG) System.out.println(ANSI_GREEN + "Move is inboundds" + ANSI_RESET);
+          if (DEBUG) System.out.println(ANSI_GREEN + "Move is inbounds" + ANSI_RESET);
           // Make the next move by swapping ZERO and the value that's in bounds
           long tmp = tmpBoard[DY[i] + zeroRow][DX[i] + zeroCol];
           tmpBoard[DY[i] + zeroRow][DX[i] + zeroCol] = 0;
