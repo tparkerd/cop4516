@@ -1,29 +1,36 @@
 import java.util.Scanner;
 import java.util.Arrays;
 import java.util.ArrayList;
+@SuppressWarnings("unchecked")
 
 public class minion {
-  public static final boolean DEBUG = true;
-  public static ArrayList[] graph;
+  public static final boolean DEBUG = false;
+  public static ArrayList<Node>[] graph;
   public static String[] obstacles;
   public static int count;
+  public static boolean flag;
 
 
   public static void main(String[] args) {
     Scanner stdin = new Scanner(System.in);
     // Get the number of cases
     int nCases = Integer.parseInt(stdin.nextLine());
+
+    // For each case...
     for (int i = 0; i < nCases; i++) {
+
       // Get the trials the ninja is unable to accomplish
       int nObstacles = Integer.parseInt(stdin.nextLine());
-      String[] obstacles = new String[nObstacles];
-      if (DEBUG) System.out.println("Obstacles\n-------------------");
-      for (int j = 0; j < nObstacles; j++) {
-        obstacles[j] = stdin.nextLine();
-        if (DEBUG) System.out.println((j + 1) + ")\t" + obstacles[j]);
-      }
 
-      if (DEBUG) System.out.println(Arrays.toString(obstacles));
+      // Make a list of the obstacles
+      obstacles = new String[nObstacles];
+
+      // Store the obstacles
+      for (int j = 0; j < nObstacles; j++)
+        obstacles[j] = stdin.nextLine();
+
+      // Assume this is not yet solved
+      flag = false;
 
       // Get the number of locations and routes
       String tmp = stdin.nextLine();
@@ -49,6 +56,11 @@ public class minion {
 
         Node nodeA = new Node(a, weight);
         Node nodeB = new Node(b, weight);
+
+        // Check if the path is traversal by the ninja, if not, ignore this 'connection'
+        if (nodeA.in(obstacles))
+          continue;
+
         graph[a].add(nodeB);
         graph[b].add(nodeA);
         if (DEBUG) System.out.println(a + " can go to " + b + " via " + weight);
@@ -61,11 +73,12 @@ public class minion {
       visited[0] = true;
       count = 0;
 
+
       if (DEBUG) System.out.println(Arrays.toString(obstacles));
-      dfs(graph, new boolean[nLocations], 0, obstacles);
+      dfs(graph, new boolean[nLocations], 0, nLocations - 1);
       if (DEBUG) System.out.println("ANSWER: " + count);
 
-      if (count == nLocations - 1) {
+      if (flag) {
         System.out.println(1);
       } else {
         System.out.println(0);
@@ -74,21 +87,22 @@ public class minion {
   }
 
 
-  public static void dfs(ArrayList[] graph, boolean[] visited, int v, String[] obs) {
+  public static void dfs(ArrayList<Node>[] graph, boolean[] visited, int v, int target) {
+    if(v == target) {
+      if (DEBUG) System.out.println("Reached target");
+      flag = true;
+    }
     visited[v] = true;
-    for (Node next : ((ArrayList<Node>)graph[v])) {
+    for (Node next : graph[v]) {
       if (DEBUG) System.out.println(v + " -> " + next.toString());
-      if (!next.in(obs)) {
-        if(!visited[next.index]) {
-          dfs(graph, visited, next.index, obs);
+        if(!visited[next.index] && !flag) {
           count++;
+          dfs(graph, visited, next.index, target);
+          if (DEBUG) System.out.println("Current count: " + count);
         } else {
           if (DEBUG) System.out.println(next.index + " has already been visited.");
         }
-      } else {
-        if (DEBUG) System.out.println("Can't pass obstacle: " + next.weight);
       }
-    }
   }
 
 }
