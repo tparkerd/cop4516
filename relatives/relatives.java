@@ -2,7 +2,7 @@ import java.util.*;
 
 
 public class relatives {
-  public static final boolean DEBUG = true;
+  public static final boolean DEBUG = false;
   public static int[][] G;
   public static int[][] D;
   public static int N;
@@ -18,8 +18,6 @@ public class relatives {
     String nPeople = stdin.next();
     String nRelationships = stdin.next();
     if (DEBUG) System.out.printf("nPeople (%s) & nRelationships (%s)\n", nPeople, nRelationships);
-    // N = Integer.parseInt(stdin.next());
-    // R = Integer.parseInt(stdin.next());
     N = Integer.parseInt(nPeople);
     R = Integer.parseInt(nRelationships);
     if (DEBUG) System.out.printf("N (%d) & R (%d)\n", N, R);
@@ -37,10 +35,7 @@ public class relatives {
       // New hash map to store people as indices
       myHashMap = new HashMap<String, Integer>();
 
-      // // Initialize all relationships to infinity
-      // for (int[] row : G)
-      //   Arrays.fill(row, oo);
-
+      // Initialize all relationships to infinity and zero out self distances
       for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
           if (i == j)
@@ -53,24 +48,16 @@ public class relatives {
       // Insert everyone into the HashMap
       int indexCounter = 0;
       for (String str : relationships) {
+        if (DEBUG) System.out.println("Contains " + str + "?");
         // Person not already mapped
         if (!myHashMap.containsKey(str)) {
+          if (DEBUG) System.out.println("Nope! Add " + str);
           myHashMap.put(str, indexCounter);
           indexCounter++;
         }
       }
 
       printHashMap();
-
-      // // A person has no distance from itself
-      // for (int i = 0; i < R; i++) {
-      //   for (int j = 0; j < R; j++) {
-      //     if (i == j) {
-      //       G[i][j] = 0;
-      //     }
-      //   }
-      // }
-
 
       // Parse out the relationships from the relationships buffer
       // These are the edges on the G
@@ -90,9 +77,9 @@ public class relatives {
       System.out.printf("Network %d: ", caseCounter);
       int result = findMax();
       if (result == oo) {
-        System.out.println("DISCONNECTED");
+        System.out.println("DISCONNECTED\n");
       } else {
-        System.out.println(result);
+        System.out.println(result + "\n");
       }
 
 
@@ -100,8 +87,6 @@ public class relatives {
       nPeople = stdin.next();
       nRelationships = stdin.next();
       if (DEBUG) System.out.printf("nPeople (%s) & nRelationships (%s)\n", nPeople, nRelationships);
-      // N = Integer.parseInt(stdin.next());
-      // R = Integer.parseInt(stdin.next());
       N = Integer.parseInt(nPeople);
       R = Integer.parseInt(nRelationships);
       if (DEBUG) System.out.printf("N (%d) & R (%d)\n", N, R);
@@ -124,9 +109,6 @@ public class relatives {
       for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
           D[i][j] = Math.min(D[i][j], D[i][k] + D[k][j]);
-          // if ((D[i][j] > D[i][k] + D[k][j]) && (D[i][k] < oo) && (D[k][j] < oo)) {
-          //   D[i][j] =  D[i][k] + D[k][j];
-          // }
         }
       }
     }
