@@ -1,6 +1,8 @@
 import java.util.*;
 
+
 public class relatives {
+  public static final boolean DEBUG = true;
   public static int[][] G;
   public static int[][] D;
   public static int N;
@@ -13,8 +15,14 @@ public class relatives {
 
     int caseCounter = 1;
     // Get the people count and relationship count
-    N = Integer.parseInt(stdin.next().trim());
-    R = Integer.parseInt(stdin.next().trim());
+    String nPeople = stdin.next();
+    String nRelationships = stdin.next();
+    if (DEBUG) System.out.printf("nPeople (%s) & nRelationships (%s)\n", nPeople, nRelationships);
+    // N = Integer.parseInt(stdin.next());
+    // R = Integer.parseInt(stdin.next());
+    N = Integer.parseInt(nPeople);
+    R = Integer.parseInt(nRelationships);
+    if (DEBUG) System.out.printf("N (%d) & R (%d)\n", N, R);
     while (N != 0 && R != 0) {
 
       // Get all the relationships
@@ -29,9 +37,18 @@ public class relatives {
       // New hash map to store people as indices
       myHashMap = new HashMap<String, Integer>();
 
-      // Initialize all relationships to infinity
-      for (int[] row : G)
-        Arrays.fill(row, oo);
+      // // Initialize all relationships to infinity
+      // for (int[] row : G)
+      //   Arrays.fill(row, oo);
+
+      for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+          if (i == j)
+            G[i][j] = 0;
+          else
+            G[i][j] = oo;
+        }
+      }
 
       // Insert everyone into the HashMap
       int indexCounter = 0;
@@ -43,14 +60,16 @@ public class relatives {
         }
       }
 
-      // A person has no distance from itself
-      for (int i = 0; i < R; i++) {
-        for (int j = 0; j < R; j++) {
-          if (i == j) {
-            G[i][j] = 0;
-          }
-        }
-      }
+      printHashMap();
+
+      // // A person has no distance from itself
+      // for (int i = 0; i < R; i++) {
+      //   for (int j = 0; j < R; j++) {
+      //     if (i == j) {
+      //       G[i][j] = 0;
+      //     }
+      //   }
+      // }
 
 
       // Parse out the relationships from the relationships buffer
@@ -62,7 +81,11 @@ public class relatives {
         G[end][start] = 1;
       }
 
+      printArray();
+
       floyd();
+
+      printDistanceArray();
 
       System.out.printf("Network %d: ", caseCounter);
       int result = findMax();
@@ -71,9 +94,17 @@ public class relatives {
       } else {
         System.out.println(result);
       }
+
+
       // Get the people count and relationship count
-      N = Integer.parseInt(stdin.next().trim());
-      R = Integer.parseInt(stdin.next().trim());
+      nPeople = stdin.next();
+      nRelationships = stdin.next();
+      if (DEBUG) System.out.printf("nPeople (%s) & nRelationships (%s)\n", nPeople, nRelationships);
+      // N = Integer.parseInt(stdin.next());
+      // R = Integer.parseInt(stdin.next());
+      N = Integer.parseInt(nPeople);
+      R = Integer.parseInt(nRelationships);
+      if (DEBUG) System.out.printf("N (%d) & R (%d)\n", N, R);
       caseCounter++;
     }
   }
@@ -81,19 +112,21 @@ public class relatives {
 
 
   public static void floyd() {
+    // Copy the original graph to the distance graph
     D = new int[N][N];
-    for (int i = 0; i < N; ++i) {
-      for (int j = 0; j < N; ++j) {
+    for (int i = 0; i < N; i++) {
+      for (int j = 0; j < N; j++) {
         D[i][j] = G[i][j];
       }
     }
 
-    for (int k = 0; k < N; ++k) {
-      for (int i = 0; i < N; ++i) {
-        for (int j = 0; j < N; ++j) {
-          if ((D[i][j] > D[i][k] + D[k][j]) && (D[i][k] < oo) && (D[k][j] < oo)) {
-            D[i][j] =  D[i][k] + D[k][j];
-          }
+    for (int k = 0; k < N; k++) {
+      for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+          D[i][j] = Math.min(D[i][j], D[i][k] + D[k][j]);
+          // if ((D[i][j] > D[i][k] + D[k][j]) && (D[i][k] < oo) && (D[k][j] < oo)) {
+          //   D[i][j] =  D[i][k] + D[k][j];
+          // }
         }
       }
     }
@@ -101,13 +134,50 @@ public class relatives {
 
   public static int findMax() {
     int max = Integer.MIN_VALUE;
-    for (int i = 0; i < N; ++i) {
-      for (int j = 0; j < N; ++j) {
+    for (int i = 0; i < N; i++) {
+      for (int j = 0; j < N; j++) {
         if (D[i][j] > max) {
           max = D[i][j];
         }
       }
     }
     return max;
+  }
+
+
+  public static void printArray() {
+    if (DEBUG) System.out.println("Adjacency Matrix\n---------------------------");
+    for (int i = 0; i < G.length; i++) {
+      for (int j = 0; j < G.length; j++) {
+        if (G[i][j] != oo) {
+          if (DEBUG) System.out.print(G[i][j] + "\t");
+        } else {
+          if (DEBUG) System.out.print('\u221E' + "\t");
+        }
+      }
+      if (DEBUG) System.out.println();
+    }
+    if (DEBUG) System.out.println("---------------------------");
+  }
+
+  public static void printDistanceArray() {
+    if (DEBUG) System.out.println("Distance Matrix\n---------------------------");
+    for (int i = 0; i < D.length; i++) {
+      for (int j = 0; j < D.length; j++) {
+        if (D[i][j] != oo) {
+          if (DEBUG) System.out.print(D[i][j] + "\t");
+        } else {
+          if (DEBUG) System.out.print('\u221E' + "\t");
+        }
+      }
+      if (DEBUG) System.out.println();
+    }
+    if (DEBUG) System.out.println("---------------------------");
+  }
+
+  public static void printHashMap() {
+    if (DEBUG) System.out.println("HashMap (Name -> Index)\n---------------------------");
+    if (DEBUG) myHashMap.forEach((k,v)-> System.out.println(k+", "+v));
+    if (DEBUG) System.out.println("---------------------------");
   }
 }
