@@ -10,15 +10,11 @@ public class circlecross {
 		String str = br.readLine();
 		char[] a = str.toCharArray();
 
-		if (DEBUG) System.out.println(str);
 		if (DEBUG) System.out.println(Arrays.toString(a));
 
-		Integer[] openStatus = new Integer[26];
 
+		int[] openStatus = new int[27];
 		if (DEBUG) System.out.println(Arrays.toString(openStatus));
-		Arrays.fill(openStatus, 0);
-		if (DEBUG) System.out.println(Arrays.toString(openStatus));
-
 
 		int counter = 0;
 		for (int i = 0; i < a.length; i++) {
@@ -32,7 +28,7 @@ public class circlecross {
 				if (DEBUG) System.out.println("Opening index: " + tmpChar + " -> " + startIndex);
 				int tmpCount = 0;
 				for (int j = startIndex + 1; j < i; j++) {
-					if (openStatus[j] == 1)
+					if (openStatus[a[j] - 'A'] == 1)
 						tmpCount++;
 				}
 				counter += tmpCount;
@@ -52,6 +48,6 @@ public class circlecross {
 			if (a[i] == c)
 				return i;
 		}
-		return 0;
+		return 25;
 	}
 }
