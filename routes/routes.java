@@ -1,14 +1,12 @@
 import java.util.*;
 
 public class routes {
-  public static final boolean DEBUG = false;
   public static int[][] G;
   public static int[][] D;
   public static int[][] P;
   public static int oo = 999999;
   public static int V;
   public static int E;
-  public static ArrayList<Edge> edges;
 
   public static void main(String[] args) {
     Scanner stdin = new Scanner(System.in);
@@ -18,10 +16,9 @@ public class routes {
     for (int i = 0; i < nCases; i++) {
 
       V = stdin.nextInt();     // num of intersections (n)
-      E = stdin.nextInt(); // num of roads connecting the intersections (m)
+      E = stdin.nextInt();     // num of roads connecting the intersections (m)
       int q = stdin.nextInt(); // num of off-campus housing locations (q)
 
-      edges = new ArrayList<Edge>();
       G = new int[V][V];
 
       // Initialize the graph
@@ -34,22 +31,18 @@ public class routes {
         }
       }
 
-      // For each road, get the start, end, and weight (weight is positive)
+      // For each road, get the start, end, and weight
       for (int j = 0; j < E; j++) {
         int u = stdin.nextInt(); // start
         int v = stdin.nextInt(); // end
         int c = stdin.nextInt(); // weight
-
           G[u - 1][v - 1] = c;
-          // G[v - 1][u - 1] = c;
-
       }
 
       floyd();
 
       // For each off-campus location to query
       for (int j = 0; j < q; j++) {
-        int u = 1; // start - always connects at intersection 1
         int v = stdin.nextInt(); // end
         System.out.println(sumPath(0, v - 1));
       }
@@ -91,11 +84,11 @@ public class routes {
 
   public static int sumPath(int source, int target) {
     if (D[source][target] == oo)
-      return 0;
+      return -1;
 
     int total = 0;
 
-    LinkedList<Integer> path = new LinkedList<Integer>();
+    // LinkedList<Integer> path = new LinkedList<Integer>();
     // path.addFirst(target);
     while (target != source) {
       total += D[source][target];
