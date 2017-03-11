@@ -1,7 +1,7 @@
 import java.util.*;
 
 public class alphabet {
-	public static int N = 52; // number of possible letters
+	// public static int N = 50; // number of possible letters
 	public static final boolean DEBUG = true;
 
 	public static void main(String[] args) {
@@ -14,48 +14,35 @@ public class alphabet {
 			String[] letters = stdin.nextLine().split(" ");
 			char[] redLetters = letters[0].toCharArray();
 			char[] greenLetters = letters[1].toCharArray();
-			int[][] adjMatrix = new int[N][N];
+			int N, M;
+			N = redLetters.length + 1;
+			M = greenLetters.length + 1;
+			int[][] adjMatrix = new int[N][M];
+
+			if (DEBUG) System.out.println("N: " + (N) + ", M: " + (M));
 
 			// Fill in actual connections between red and green letters
-			for (int r = 0; r < redLetters.length; r++) {
-				for (int g = 0; g < greenLetters.length; g++) {
-					if (Math.abs(redLetters[r] - greenLetters[g]) > 2) {
-						adjMatrix[redLetters[r] - 'a'][convert(greenLetters[g])]++;
-					}
+			for (int r = 0; r < N; r++) {
+				for (int g = 0; g < M; g++) {
+					if (DEBUG) System.out.printf("L(%d, %d)\n", r, g);
+
+					// if ((g < M - 2) && Math.abs(redLetters[r] - greenLetters[g]) > 2) {  } // valid
 				}
 			}
 
-			if (DEBUG) System.out.println("-: [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z]");
-
 			// Debug, print the adjacency matrix
 			for (int q = 0; q < adjMatrix.length; q++) {
-				if (q >= 26) {
-					if (DEBUG) System.out.println((char)(q - 26 + 'A') + ": " + Arrays.toString(adjMatrix[q]));
-				}
-				else {
-					if (DEBUG) System.out.println((char)(q + 'a') + ": " + Arrays.toString(adjMatrix[q]));
-				}
+				if (DEBUG) System.out.println((q + ": " + Arrays.toString(adjMatrix[q])));
+
 			}
 
 
 			FordFulkerson graph = new FordFulkerson(N);
 
-			// Connect source and sink
-			// Connect source to all red letters
-			for (int q = 0; q < redLetters.length; q++) {
-				if (DEBUG) System.out.printf("Add source [%d][%c]\n", N, redLetters[q]);
-				graph.add(N, redLetters[q] - 'a', 1);
-			}
-
-			// Connect green letters to sink
-			for (int q = 0; q < greenLetters.length; q++) {
-				if (DEBUG) System.out.printf("Add sink: [%c][%d]\n", greenLetters[q], N + 1);
-				graph.add(convert(greenLetters[q]), N + 1, 1);
-			}
 
 			// Add edges to graph
 			for (int row = 0; row < N; row++) {
-				for (int col = 0; col < N; col++) {
+				for (int col = 0; col < M; col++) {
 					if (adjMatrix[row][col] > 0) {
 						if (DEBUG) System.out.printf("Adding matrix[%d][%d]\n", row, col);
 						graph.add(row, col, adjMatrix[row][col]);
