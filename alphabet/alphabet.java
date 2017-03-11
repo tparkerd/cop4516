@@ -2,7 +2,7 @@ import java.util.*;
 
 public class alphabet {
 	public static int N = 52; // number of possible letters
-	public static final boolean DEBUG = false;
+	public static final boolean DEBUG = true;
 
 	public static void main(String[] args) {
 		Scanner stdin = new Scanner(System.in);
@@ -20,8 +20,7 @@ public class alphabet {
 			for (int r = 0; r < redLetters.length; r++) {
 				for (int g = 0; g < greenLetters.length; g++) {
 					if (Math.abs(redLetters[r] - greenLetters[g]) > 2) {
-						if (DEBUG) System.out.println(convert(greenLetters[g]) + " = " + (greenLetters[g] - 'a' + 'A'));
-						adjMatrix[redLetters[r] - 'a'][convert(greenLetters[g])] = 1;
+						adjMatrix[redLetters[r] - 'a'][convert(greenLetters[g])]++;
 					}
 				}
 			}
@@ -29,11 +28,17 @@ public class alphabet {
 			if (DEBUG) System.out.println("-: [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z]");
 
 			// Debug, print the adjacency matrix
-			for (int q = 0; q < adjMatrix.length - 2; q++) {
+			for (int q = 0; q < adjMatrix.length; q++) {
+				if (q >= 26) {
+					if (DEBUG) System.out.println((char)(q - 26 + 'A') + ": " + Arrays.toString(adjMatrix[q]));
+				}
+				else {
 					if (DEBUG) System.out.println((char)(q + 'a') + ": " + Arrays.toString(adjMatrix[q]));
+				}
 			}
-			FordFulkerson graph = new FordFulkerson(N);
 
+
+			FordFulkerson graph = new FordFulkerson(N);
 
 			// Connect source and sink
 			// Connect source to all red letters
@@ -52,8 +57,8 @@ public class alphabet {
 			for (int row = 0; row < N; row++) {
 				for (int col = 0; col < N; col++) {
 					if (adjMatrix[row][col] > 0) {
-						if (DEBUG) System.out.printf("Adding matrix[%c][%c]\n", row + 'a', col + 'a');
-						graph.add(row, col, 1);
+						if (DEBUG) System.out.printf("Adding matrix[%d][%d]\n", row, col);
+						graph.add(row, col, adjMatrix[row][col]);
 					}
 				}
 			}
@@ -70,22 +75,18 @@ public class alphabet {
 
 
 class FordFulkerson {
-
-	// Stores graph.
-	public int[][] cap;
-	public int n;
-	public int source;
-	public int sink;
-
-	// "Infinite" flow.
-	final public static int oo = (int)(1E9);
+	int[][] cap;
+	boolean[] vis;
+	int n, s, t, oo = (int)1E9;
 
 	// Set up default flow network with size+2 vertices, size is source, size+1 is sink.
 	public FordFulkerson(int size) {
 		n = size + 2;
-		source = n - 2;
-		sink = n - 1;
+		s = n - 2;
+		t = n - 1;
 		cap = new int[n][n];
+
+		if (alphabet.DEBUG) System.out.println("Src: " + s + " Sink: " + t);
 	}
 
 	// Adds an edge from v1 -> v2 with capacity c.
@@ -97,58 +98,51 @@ class FordFulkerson {
 	public int ff() {
 
 		// Set visited array and flow.
-		boolean[] visited = new boolean[n];
-		int flow = 0;
-
-		// Loop until no augmenting paths found.
+		vis = new boolean[n]; int f = 0;
 		while (true) {
-
 			// Run one DFS.
-			Arrays.fill(visited, false);
-			int res = dfs(source, visited, oo);
+			Arrays.fill(vis, false); int res = dfs(s, oo);
 
 			// Nothing found, get out.
 			if (res == 0) break;
 
 			// Add this flow.
-			flow += res;
+			f += res;
 		}
-
 		// Return it.
-		return flow;
+		return f;
 	}
 
 	// DFS to find augmenting math from v with maxflow at most min.
-	public int dfs(int v, boolean[] visited, int min) {
+	public int dfs(int pos, int min) {
 
 		// got to the sink, this is our flow.
-		if (v == sink)  return min;
+		if (pos == t)  return min;
 
 		// We've been here before - no flow.
-		if (visited[v])  return 0;
+		if (vis[pos])  return 0;
 
 		// Mark this node and recurse.
-		visited[v] = true;
-		int flow = 0;
+		vis[pos] = true; int f = 0;
 
 		// Just loop through all possible next nodes.
 		for (int i = 0; i < n; i++) {
 
 			// We can augment in this direction.
-			if (cap[v][i] > 0)
-				flow = dfs(i, visited, Math.min(cap[v][i], min));
+			if (cap[pos][i] > 0)
+				f = dfs(i, Math.min(cap[pos][i], min));
 
 			// We got positive flow on this recursive route, return it.
-			if (flow > 0) {
+			if (f > 0) {
 
 				// Subtract it going forward.
-				cap[v][i] -= flow;
+				cap[pos][i] -= f;
 
 				// Add it going backwards, so that later, we can flow back through this edge as a backedge.
-				cap[i][v] += flow;
+				cap[i][pos] += f;
 
 				// Return this flow.
-				return flow;
+				return f;
 			}
 		}
 
