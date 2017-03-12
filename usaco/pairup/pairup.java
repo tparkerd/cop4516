@@ -8,8 +8,6 @@ public class pairup {
 
     int N = Integer.parseInt(br.readLine());
 
-    int a = 2000000000;
-
     // Store all of the cows
     int[][] data = new int[N][2];
     int M = 0;
