@@ -2,7 +2,7 @@ import java.util.*;
 
 public class alphabet {
 	// public static int N = 50; // number of possible letters
-	public static final boolean DEBUG = true;
+	public static final boolean DEBUG = false;
 
 	public static void main(String[] args) {
 		Scanner stdin = new Scanner(System.in);
@@ -11,38 +11,45 @@ public class alphabet {
 		// For each case...
 		for (int i = 0; i < nCases; i++) {
 			// Get all the letters and split into two
-			String[] letters = stdin.nextLine().split(" ");
-			char[] redLetters = letters[0].toCharArray();
-			char[] greenLetters = letters[1].toCharArray();
-			int N, M;
-			N = redLetters.length + 1;
-			M = greenLetters.length + 1;
-			int[][] adjMatrix = new int[N][M];
-
-			if (DEBUG) System.out.println("N: " + (N) + ", M: " + (M));
+			String[] line = stdin.nextLine().split(" ");
+			char[] redLetters = line[0].toCharArray();
+			char[] greenLetters = line[1].toCharArray();
+			char[] letters = (line[0] + line[1]).toCharArray();
+			int N = letters.length + 2;
+			int[][] adjMatrix = new int[N][N];
 
 			// Fill in actual connections between red and green letters
 			for (int r = 0; r < N; r++) {
-				for (int g = 0; g < M; g++) {
-					if (DEBUG) System.out.printf("L(%d, %d)\n", r, g);
+				for (int g = 0; g < N; g++) {
+					// If source
+					if ((r == N - 2) && (g < redLetters.length)) adjMatrix[r][g] = 1;
+					// If sink
+					if ((g == N - 1) && (r < N - 2) && (r > redLetters.length - 1)) adjMatrix[r][g] = 1;
 
-					// if ((g < M - 2) && Math.abs(redLetters[r] - greenLetters[g]) > 2) {  } // valid
+					// If in bounds for actual letters
+					if ((r < redLetters.length) && (g < N - 2) && (g > redLetters.length - 1)) {
+						if (Math.abs(redLetters[r] - greenLetters[g - redLetters.length]) > 2) {
+							if (DEBUG) System.out.println("Found a match");
+							adjMatrix[r][g] = 1;
+						}
+
+					}
+
 				}
 			}
 
 			// Debug, print the adjacency matrix
 			for (int q = 0; q < adjMatrix.length; q++) {
 				if (DEBUG) System.out.println((q + ": " + Arrays.toString(adjMatrix[q])));
-
 			}
 
 
-			FordFulkerson graph = new FordFulkerson(N);
+			FordFulkerson graph = new FordFulkerson(N - 2);
 
 
 			// Add edges to graph
 			for (int row = 0; row < N; row++) {
-				for (int col = 0; col < M; col++) {
+				for (int col = 0; col < N; col++) {
 					if (adjMatrix[row][col] > 0) {
 						if (DEBUG) System.out.printf("Adding matrix[%d][%d]\n", row, col);
 						graph.add(row, col, adjMatrix[row][col]);
@@ -72,8 +79,6 @@ class FordFulkerson {
 		s = n - 2;
 		t = n - 1;
 		cap = new int[n][n];
-
-		if (alphabet.DEBUG) System.out.println("Src: " + s + " Sink: " + t);
 	}
 
 	// Adds an edge from v1 -> v2 with capacity c.

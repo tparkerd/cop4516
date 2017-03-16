@@ -9,37 +9,36 @@ public class pairup {
     int N = Integer.parseInt(br.readLine());
 
     // Store all of the cows
-    int[][] data = new int[N][2];
     int M = 0;
+    ArrayList<Integer> cows = new ArrayList<Integer>();
     for (int i = 0; i < N; i++) {
       String[] line = br.readLine().split(" ");
-      data[i][0] = Integer.parseInt(line[0]);
-      data[i][1] = Integer.parseInt(line[1]);
-      M += data[i][0];
-    }
-    // Gather all the cows so they can be sorted
-    int[] cows = new int[M];
-    int cownter = 0;
-    for (int i = 0; i < N; i++) {
-      for (int j = 0; j < data[i][0]; j++) {
-        if ((data[i][0] - j) > 0) {
-          cows[cownter++] = data[i][1];
+      int x = Integer.parseInt(line[0]);
+      int y = Integer.parseInt(line[1]);
+      // Add the individual cows
+      for (int j = 0; j < x; j++) {
+        if ((x - j) > 0) {
+          cows.add(y);
         }
       }
+      M += x;
     }
 
     // Sort the cows
-    Arrays.sort(cows);
+    Collections.sort(cows);
 
-    int candidate = cows[0] + cows[cows.length - 1];
-    for (int i = 1; i < cows.length / 2; i++) {
-      int tmp = cows[i] + cows[cows.length - i - 1];
-      if (tmp < candidate)
+    // System.out.println(cows.toString());
+
+    int candidate = cows.get(0) + cows.get(cows.size() - 1);
+    for (int i = 1; i < cows.size() / 2; i++) {
+      int tmp = cows.get(i) + cows.get(cows.size() - i - 1);
+      if (tmp < candidate) {
         break;
-      else
-        Math.max(tmp, candidate);
+      }
+      else {
+        candidate = Math.max(tmp, candidate);
+      }
     }
-
 
 		pw.println(candidate);
 		pw.close();
