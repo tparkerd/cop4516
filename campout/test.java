@@ -1,7 +1,7 @@
 import java.util.*;
 
 public class test {
-  public static final boolean DEBUG = false;
+  public static final boolean DEBUG = true;
   public static final int NUM_STUDENTS = 10;
   public static final int offset = NUM_STUDENTS + 1; // +1 b/c of the source
   public static Dinic myNetFlow;
@@ -114,30 +114,65 @@ public class test {
         }
       }
 
-      int ans = g.ff();
-      if (ans == 168)
-        System.out.printf("Case #%d: YES\n", c + 1);
-      else
-        System.out.printf("Case #%d: NO\n", c + 1);
+      // Try 0 guards, then 1, etc.
+			if (!solvable(graph, NUM_STUDENTS, 0))
+				System.out.println("0");
+			else {
+        if (DEBUG) System.out.println("Passed the first one");
+				int tryval = 1;
+				while (solvable(graph, NUM_STUDENTS, tryval)) tryval++;
+				System.out.println(tryval-1);
+			}
+
+      // int ans = g.ff();
+      // if (ans == 168)
+      //   System.out.printf("Case #%d: YES\n", c + 1);
+      // else
+      //   System.out.printf("Case #%d: NO\n", c + 1);
     }
   }
 
 	public static int convert(char c) {
 			return (c - 'a' + 26);
 	}
+
+
+  // Returns true iff we can cover each shift with tryval guards.
+public static boolean solvable(int[][] graph, int n, int tryval) {
+
+  int s = graph.length;
+  FordFulkerson myNetFlow = new FordFulkerson(n+168);
+  for (int i=0; i<s; i++)
+    for (int j=0; j<s; j++)
+      if (graph[i][j] > 0)
+        myNetFlow.add(i, j, graph[i][j]);
+
+  // Fill in the flows from all the shifts to the sink.
+  for (int j=0; j<168; j++)
+    myNetFlow.add(n+j, s-1, tryval);
+
+  int flow = myNetFlow.ff();
+  return flow == tryval*168;
+}
 }
 
 
 class FordFulkerson {
-	int[][] cap;
-	boolean[] vis;
-	int n, s, t, oo = (int)1E9;
+
+	// Stores graph.
+	public int[][] cap;
+	public int n;
+	public int source;
+	public int sink;
+
+	// "Infinite" flow.
+	final public static int oo = (int)(1E9);
 
 	// Set up default flow network with size+2 vertices, size is source, size+1 is sink.
 	public FordFulkerson(int size) {
 		n = size + 2;
-		s = n - 2;
-		t = n - 1;
+		source = n - 2;
+		sink = n - 1;
 		cap = new int[n][n];
 	}
 
@@ -150,51 +185,58 @@ class FordFulkerson {
 	public int ff() {
 
 		// Set visited array and flow.
-		vis = new boolean[n]; int f = 0;
+		boolean[] visited = new boolean[n];
+		int flow = 0;
+
+		// Loop until no augmenting paths found.
 		while (true) {
+
 			// Run one DFS.
-			Arrays.fill(vis, false); int res = dfs(s, oo);
+			Arrays.fill(visited, false);
+			int res = dfs(source, visited, oo);
 
 			// Nothing found, get out.
 			if (res == 0) break;
 
 			// Add this flow.
-			f += res;
+			flow += res;
 		}
+
 		// Return it.
-		return f;
+		return flow;
 	}
 
 	// DFS to find augmenting math from v with maxflow at most min.
-	public int dfs(int pos, int min) {
+	public int dfs(int v, boolean[] visited, int min) {
 
 		// got to the sink, this is our flow.
-		if (pos == t)  return min;
+		if (v == sink)  return min;
 
 		// We've been here before - no flow.
-		if (vis[pos])  return 0;
+		if (visited[v])  return 0;
 
 		// Mark this node and recurse.
-		vis[pos] = true; int f = 0;
+		visited[v] = true;
+		int flow = 0;
 
 		// Just loop through all possible next nodes.
 		for (int i = 0; i < n; i++) {
 
 			// We can augment in this direction.
-			if (cap[pos][i] > 0)
-				f = dfs(i, Math.min(cap[pos][i], min));
+			if (cap[v][i] > 0)
+				flow = dfs(i, visited, Math.min(cap[v][i], min));
 
 			// We got positive flow on this recursive route, return it.
-			if (f > 0) {
+			if (flow > 0) {
 
 				// Subtract it going forward.
-				cap[pos][i] -= f;
+				cap[v][i] -= flow;
 
 				// Add it going backwards, so that later, we can flow back through this edge as a backedge.
-				cap[i][pos] += f;
+				cap[i][v] += flow;
 
 				// Return this flow.
-				return f;
+				return flow;
 			}
 		}
 
