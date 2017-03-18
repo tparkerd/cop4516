@@ -1,10 +1,9 @@
 import java.util.*;
 
 public class test {
-  public static final boolean DEBUG = true;
+  public static final boolean DEBUG = false;
   public static final int NUM_STUDENTS = 10;
   public static final int offset = NUM_STUDENTS + 1; // +1 b/c of the source
-  public static Dinic myNetFlow;
 
   public static void main(String[] args) {
 
@@ -12,7 +11,7 @@ public class test {
     int nCases = stdin.nextInt();
 
     for (int c = 0; c < nCases; c++) {
-      // 0 = src, s-1 = sink, 1-n students, n+1 -> shifts
+      // s - 2 = src, s-1 = sink, 0-n students, n+1 -> shifts
       int s = NUM_STUDENTS + (7 * 24) + 2;
       int[][] graph = new int[s][s];
 
@@ -22,22 +21,56 @@ public class test {
       }
 
 
+      // Unlink the sink from everything
+      Arrays.fill(graph[s - 1], 0);
+      // Unlink the source from everything
+      Arrays.fill(graph[s - 2], 0);
+
+      // Only the source should link a student
+      for (int j = 0; j < s - 2; j++)
+        Arrays.fill(graph[j], 0, NUM_STUDENTS, 0);
       // Link source to all students
-      Arrays.fill(graph[0], 0);
-      graph[0][s-1] = 0; // Unlink the source from the sink
-      for (int j = 1; j <= NUM_STUDENTS; j++) {
-        graph[0][j] = 1;
-        graph[j][s-1] = 0; // unlink the preson from the sink
+      Arrays.fill(graph[s - 2], 0, NUM_STUDENTS, 168); // 168 hours max per student
+      // Students cannot link to the sink or source
+      for (int j = 0; j < NUM_STUDENTS; j++) {
+        graph[j][s - 2] = 0;
+        graph[j][s - 1] = 0;
       }
 
-      for (int j = 0; j < s; j++) {
-        // Nothing should link back to the source
-        graph[j][0] = 0;
+      // Shifts cannot link to other shifts
+      for (int j = NUM_STUDENTS; j < s; j++) {
+        Arrays.fill(graph[j], NUM_STUDENTS, s - 1, 0);
       }
+
+
+      // // Shifts
+      // // Unlink all shifts from one another
+      // for (int j = NUM_STUDENTS; j < s - 2; j++)
+      //   Arrays.fill(graph[j], NUM_STUDENTS, s - 2, 0);
+      //
+      // // Source
+      // // Unlink the source from the shifts, itself, and the sink
+      // Arrays.fill(graph[s - 2], NUM_STUDENTS, s - 2, 0);
+      // // Nothing should link back to the source
+      // for (int j = 0; j < s; j++) {
+      //   graph[j][s - 2] = 0;
+      // }
+      // // Source should not link to the sink
+      // graph[s - 2][s - 1] = 0;
+      //
+      // // Sink
+      // // Students should not link to the sink
+      // for (int j = 0; j < NUM_STUDENTS; j++)
+      //   graph[j][s - 1] = 0;
+
+      // for (int[] e : graph) {
+      //   if (DEBUG) System.out.println(Arrays.toString(e));
+      // }
+      // System.exit(0);
 
 
       // Read in person-by-person
-      for (int j = 1; j <= NUM_STUDENTS; j++) {
+      for (int j = 0; j < NUM_STUDENTS; j++) {
         int nBusyTimes = stdin.nextInt();
         // For each time the student is busy...
         for (int k = 0; k < nBusyTimes; k++) {
@@ -48,97 +81,81 @@ public class test {
           int weekStartHour = ((day - 1) * 24) + startHour;
           int weekEndHour = ((day - 1) * 24) + endHour;
 
-          // if (DEBUG) System.out.printf("#%d) day(%d) start(%d) end(%d) ws(%d) we(%d)\n", j + 1, day, startHour, endHour, weekStartHour, weekEndHour);
 
+
+          if (DEBUG) System.out.printf("#%d) day(%d) start(%d) end(%d) ws(%d) we(%d)\n", j + 1, day, startHour, endHour, weekStartHour, weekEndHour);
+
+
+          // NOTE(timp): TRY CONVERTING THE START AND END TIMES AND THE CONSTANTS INTO THE WEEKLY ONES
           // Change the day and time to the indices on graph and update them
           // 00:00 - 04:00
           if ((startHour >= 0 && startHour < 4) || (endHour >= 0 && endHour < 4))
-            for (int t = weekStartHour; t <= weekEndHour; t++) {
-              // if (DEBUG) System.out.println("Adding to the graph: " + t);
+            for (int t = weekStartHour; t < weekEndHour; t++) {
+              if (DEBUG) System.out.println("Adding to the graph: " + t);
               graph[j][t + offset] = 0;
             }
 
           // 04:00 - 08:00
           if ((startHour >= 4 && startHour < 8) || (endHour >= 4 && endHour < 8))
-            for (int t = weekStartHour; t <= weekEndHour; t++) {
-              // if (DEBUG) System.out.println("Adding to the graph: " + t);
+            for (int t = weekStartHour; t < weekEndHour; t++) {
+              if (DEBUG) System.out.println("Adding to the graph: " + t);
               graph[j][t + offset] = 0;
             }
 
           // 08:00 - 12:00
           if ((startHour >= 8 && startHour < 12) || (endHour >= 8 && endHour < 12))
-            for (int t = weekStartHour; t <= weekEndHour; t++) {
-              // if (DEBUG) System.out.println("Adding to the graph: " + t);
+            for (int t = weekStartHour; t < weekEndHour; t++) {
+              if (DEBUG) System.out.println("Adding to the graph: " + t);
               graph[j][t + offset] = 0;
             }
 
           // 12:00 - 16:00
           if ((startHour >= 12 && startHour < 16) || (endHour >= 12 && endHour < 16))
-            for (int t = weekStartHour; t <= weekEndHour; t++) {
-              // if (DEBUG) System.out.println("Adding to the graph: " + t);
+            for (int t = weekStartHour; t < weekEndHour; t++) {
+              if (DEBUG) System.out.println("Adding to the graph: " + t);
               graph[j][t + offset] = 0;
             }
 
           // 16:00 - 20:00
           if ((startHour >= 16 && startHour < 20) || (endHour >= 16 && endHour < 20))
-            for (int t = weekStartHour; t <= weekEndHour; t++) {
-              // if (DEBUG) System.out.println("Adding to the graph: " + t);
+            for (int t = weekStartHour; t < weekEndHour; t++) {
+              if (DEBUG) System.out.println("Adding to the graph: " + t);
               graph[j][t + offset] = 0;
             }
 
           // 20:00 - 24:00
           if ((startHour >= 20 && startHour < 24) || (endHour >= 20 && endHour < 24))
-            for (int t = weekStartHour; t <= weekEndHour; t++) {
-              // if (DEBUG) System.out.println("Adding to the graph: " + t);
+            for (int t = weekStartHour; t < weekEndHour; t++) {
+              if (DEBUG) System.out.println("Adding to the graph: " + t);
               graph[j][t + offset] = 0;
             }
         }
       }
 
-      for (int[] e : graph) {
-        if (DEBUG) System.out.println(Arrays.toString(e));
-      }
+      // // Try 0 guards, then 1, etc.
+			// if (!solvable(graph, NUM_STUDENTS, 0))
+			// 	System.out.println("0");
+			// else {
+      //   if (DEBUG) System.out.println("Passed the first one");
+			// 	int tryval = 1;
+			// 	while (solvable(graph, NUM_STUDENTS, tryval)) tryval++;
+			// 	System.out.println(tryval-1);
+			// }
 
-      int N = 180;
-
-      FordFulkerson g = new FordFulkerson(N - 2);
-
-
-      // Add edges to g
-      for (int row = 0; row < N; row++) {
-        for (int col = 0; col < N; col++) {
-          if (graph[row][col] > 0) {
-            if (DEBUG) System.out.printf("Adding matrix[%d][%d]\n", row, col);
-            g.add(row, col, graph[row][col]);
-          }
-        }
-      }
-
-      // Try 0 guards, then 1, etc.
-			if (!solvable(graph, NUM_STUDENTS, 0))
-				System.out.println("0");
-			else {
-        if (DEBUG) System.out.println("Passed the first one");
-				int tryval = 1;
-				while (solvable(graph, NUM_STUDENTS, tryval)) tryval++;
-				System.out.println(tryval-1);
-			}
-
-      // int ans = g.ff();
-      // if (ans == 168)
-      //   System.out.printf("Case #%d: YES\n", c + 1);
-      // else
-      //   System.out.printf("Case #%d: NO\n", c + 1);
+      boolean ans = solvable(graph, NUM_STUDENTS, 2);
+      if (ans)
+        System.out.printf("Case #%d: YES\n\n", c + 1);
+      else
+        System.out.printf("Case #%d: NO\n\n", c + 1);
     }
   }
 
-	public static int convert(char c) {
-			return (c - 'a' + 26);
-	}
-
-
-  // Returns true iff we can cover each shift with tryval guards.
+// Returns true iff we can cover each shift with tryval guards.
 public static boolean solvable(int[][] graph, int n, int tryval) {
+
+  for (int[] e : graph) {
+    if (DEBUG) System.out.println(Arrays.toString(e));
+  }
 
   int s = graph.length;
   FordFulkerson myNetFlow = new FordFulkerson(n+168);

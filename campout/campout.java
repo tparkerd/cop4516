@@ -1,282 +1,278 @@
-// Arup Guha
-// 6/21/2012
-// Solution to 2009 SER Problem: Museum Guards
-// Edited on 3/6/2017 to use Dinic Code shown in class.
-
 import java.util.*;
 
 public class campout {
-	public static final boolean DEBUG = true;
-	public static final int NUM_STUDENTS = 10;
-	public static final int offset = NUM_STUDENTS + 1; // +1 b/c of the source
-	public static Dinic myNetFlow;
+  public static final boolean DEBUG = true;
+  public static final int NUM_STUDENTS = 10;
+  public static final int offset = NUM_STUDENTS + 1; // +1 b/c of the source
 
-	public static void main(String[] args) {
+  public static void main(String[] args) {
 
-		Scanner stdin = new Scanner(System.in);
-		int nCases = stdin.nextInt();
+    Scanner stdin = new Scanner(System.in);
+    int nCases = stdin.nextInt();
 
-		for (int c = 0; c < nCases; c++) {
-			// 0 = src, s-1 = sink, 1-n students, n+1 -> shifts
-			int s = NUM_STUDENTS + (7 * 24) + 2;
-			int[][] graph = new int[s][s];
+    for (int c = 0; c < nCases; c++) {
+      // s - 2 = src, s-1 = sink, 0-n students, n+1 -> shifts
+      int s = NUM_STUDENTS + (7 * 24) + 2;
+      int[][] graph = new int[s][s];
 
-			// Initialize the availability graph
-			for (int i = 0; i < s; i++) {
-				Arrays.fill(graph[i], 1);
-			}
-
-
-			// Link source to all students
-			Arrays.fill(graph[0], 0);
-			graph[0][s-1] = 0; // Unlink the source from the sink
-			for (int j = 1; j <= NUM_STUDENTS; j++) {
-				graph[0][j] = 1;
-				graph[j][s-1] = 0; // unlink the preson from the sink
-			}
-
-			for (int j = 0; j < s; j++) {
-				// Nothing should link back to the source
-				graph[j][0] = 0;
-			}
+      // Initialize the availability graph
+      for (int i = 0; i < s; i++) {
+        Arrays.fill(graph[i], 1);
+      }
 
 
-			// Read in person-by-person
-			for (int j = 1; j <= NUM_STUDENTS; j++) {
-				int nBusyTimes = stdin.nextInt();
-				// For each time the student is busy...
-				for (int k = 0; k < nBusyTimes; k++) {
-					// Get the day and times they are unavailable
-					int day = stdin.nextInt();
-					int startHour = stdin.nextInt();
-					int endHour = stdin.nextInt();
-					int weekStartHour = ((day - 1) * 24) + startHour;
-					int weekEndHour = ((day - 1) * 24) + endHour;
+      // Unlink the sink from everything
+      Arrays.fill(graph[s - 1], 0);
+      // Unlink the source from everything
+      Arrays.fill(graph[s - 2], 0);
 
-					// if (DEBUG) System.out.printf("#%d) day(%d) start(%d) end(%d) ws(%d) we(%d)\n", j + 1, day, startHour, endHour, weekStartHour, weekEndHour);
+      // Only the source should link a student
+      for (int j = 0; j < s - 2; j++)
+        Arrays.fill(graph[j], 0, NUM_STUDENTS, 0);
+      // Link source to all students
+      Arrays.fill(graph[s - 2], 0, NUM_STUDENTS, 168); // 168 hours max per student
+      // Students cannot link to the sink or source
+      for (int j = 0; j < NUM_STUDENTS; j++) {
+        graph[j][s - 2] = 0;
+        graph[j][s - 1] = 0;
+      }
 
-					// Change the day and time to the indices on graph and update them
-					// 00:00 - 04:00
-					if ((startHour >= 0 && startHour < 4) || (endHour >= 0 && endHour < 4))
-						for (int t = weekStartHour; t <= weekEndHour; t++) {
-							// if (DEBUG) System.out.println("Adding to the graph: " + t);
-							graph[j][t + offset] = 0;
-						}
-
-					// 04:00 - 08:00
-					if ((startHour >= 4 && startHour < 8) || (endHour >= 4 && endHour < 8))
-						for (int t = weekStartHour; t <= weekEndHour; t++) {
-							// if (DEBUG) System.out.println("Adding to the graph: " + t);
-							graph[j][t + offset] = 0;
-						}
-
-					// 08:00 - 12:00
-					if ((startHour >= 8 && startHour < 12) || (endHour >= 8 && endHour < 12))
-						for (int t = weekStartHour; t <= weekEndHour; t++) {
-							// if (DEBUG) System.out.println("Adding to the graph: " + t);
-							graph[j][t + offset] = 0;
-						}
-
-					// 12:00 - 16:00
-					if ((startHour >= 12 && startHour < 16) || (endHour >= 12 && endHour < 16))
-						for (int t = weekStartHour; t <= weekEndHour; t++) {
-							// if (DEBUG) System.out.println("Adding to the graph: " + t);
-							graph[j][t + offset] = 0;
-						}
-
-					// 16:00 - 20:00
-					if ((startHour >= 16 && startHour < 20) || (endHour >= 16 && endHour < 20))
-						for (int t = weekStartHour; t <= weekEndHour; t++) {
-							// if (DEBUG) System.out.println("Adding to the graph: " + t);
-							graph[j][t + offset] = 0;
-						}
-
-					// 20:00 - 24:00
-					if ((startHour >= 20 && startHour < 24) || (endHour >= 20 && endHour < 24))
-						for (int t = weekStartHour; t <= weekEndHour; t++) {
-							// if (DEBUG) System.out.println("Adding to the graph: " + t);
-							graph[j][t + offset] = 0;
-						}
-				}
-			}
-
-			for (int[] e : graph) {
-				if (DEBUG) System.out.println(Arrays.toString(e));
-			}
-
-			// Try 0 guards, then 1, etc.
-			if (!solvable(graph, NUM_STUDENTS, 0))
-				System.out.println("0");
-			else {
-				int tryval = 1;
-				while (solvable(graph, NUM_STUDENTS, tryval)) tryval++;
-				System.out.println(tryval-1);
-			}
-		}
-	}
-	// Returns true iff we can cover each shift with tryval guards.
-	public static boolean solvable(int[][] graph, int n, int tryval) {
-
-		int s = graph.length;
-		myNetFlow = new Dinic(n+168);
-		for (int i=0; i<s; i++)
-			for (int j=0; j<s; j++)
-				if (graph[i][j] > 0)
-					myNetFlow.add(i, j, graph[i][j], 0);
-
-		// Fill in the flows from all the shifts to the sink.
-		for (int j=0; j<168; j++)
-			myNetFlow.add(n+j, s-1, tryval, 0);
-
-		int flow = myNetFlow.flow();
-		return flow == tryval*168;
-	}
+      // Shifts cannot link to other shifts
+      for (int j = NUM_STUDENTS; j < s; j++) {
+        Arrays.fill(graph[j], NUM_STUDENTS, s - 1, 0);
+      }
 
 
+      // // Shifts
+      // // Unlink all shifts from one another
+      // for (int j = NUM_STUDENTS; j < s - 2; j++)
+      //   Arrays.fill(graph[j], NUM_STUDENTS, s - 2, 0);
+      //
+      // // Source
+      // // Unlink the source from the shifts, itself, and the sink
+      // Arrays.fill(graph[s - 2], NUM_STUDENTS, s - 2, 0);
+      // // Nothing should link back to the source
+      // for (int j = 0; j < s; j++) {
+      //   graph[j][s - 2] = 0;
+      // }
+      // // Source should not link to the sink
+      // graph[s - 2][s - 1] = 0;
+      //
+      // // Sink
+      // // Students should not link to the sink
+      // for (int j = 0; j < NUM_STUDENTS; j++)
+      //   graph[j][s - 1] = 0;
+
+      // for (int[] e : graph) {
+      //   if (DEBUG) System.out.println(Arrays.toString(e));
+      // }
+      // System.exit(0);
 
 
+      // Read in person-by-person
+      for (int j = 0; j < NUM_STUDENTS; j++) {
+        int nBusyTimes = stdin.nextInt();
+        // For each time the student is busy...
+        for (int k = 0; k < nBusyTimes; k++) {
+          // Get the day and times they are unavailable
+          int day = stdin.nextInt();
+          int startHour = stdin.nextInt();
+          int endHour = stdin.nextInt();
+          int weekStartHour = ((day - 1) * 24) + startHour;
+          int weekEndHour = ((day - 1) * 24) + endHour;
+
+          if (DEBUG) System.out.printf("#%d) day(%d) start(%d) end(%d) ws(%d) we(%d)\n", j + 1, day, startHour, endHour, weekStartHour, weekEndHour);
+
+          // Change the day and time to the indices on graph and update them
+          // 00:00 - 04:00
+          if ((startHour >= 0 && startHour < 4) || (endHour >= 0 && endHour < 4))
+            for (int t = weekStartHour; t <= weekEndHour; t++) {
+              if (DEBUG) System.out.println("Adding to the graph: " + t);
+              graph[j][t + offset] = 0;
+            }
+
+          // 04:00 - 08:00
+          if ((startHour >= 4 && startHour < 8) || (endHour >= 4 && endHour < 8))
+            for (int t = weekStartHour; t <= weekEndHour; t++) {
+              if (DEBUG) System.out.println("Adding to the graph: " + t);
+              graph[j][t + offset] = 0;
+            }
+
+          // 08:00 - 12:00
+          if ((startHour >= 8 && startHour < 12) || (endHour >= 8 && endHour < 12))
+            for (int t = weekStartHour; t <= weekEndHour; t++) {
+              if (DEBUG) System.out.println("Adding to the graph: " + t);
+              graph[j][t + offset] = 0;
+            }
+
+          // 12:00 - 16:00
+          if ((startHour >= 12 && startHour < 16) || (endHour >= 12 && endHour < 16))
+            for (int t = weekStartHour; t <= weekEndHour; t++) {
+              if (DEBUG) System.out.println("Adding to the graph: " + t);
+              graph[j][t + offset] = 0;
+            }
+
+          // 16:00 - 20:00
+          if ((startHour >= 16 && startHour < 20) || (endHour >= 16 && endHour < 20))
+            for (int t = weekStartHour; t <= weekEndHour; t++) {
+              if (DEBUG) System.out.println("Adding to the graph: " + t);
+              graph[j][t + offset] = 0;
+            }
+
+          // 20:00 - 24:00
+          if ((startHour >= 20 && startHour < 24) || (endHour >= 20 && endHour < 24))
+            for (int t = weekStartHour; t <= weekEndHour; t++) {
+              if (DEBUG) System.out.println("Adding to the graph: " + t);
+              graph[j][t + offset] = 0;
+            }
+        }
+      }
+
+      FordFulkerson g = new FordFulkerson(s - 2);
+
+
+      // Add edges to g
+      for (int row = 0; row < s; row++) {
+        for (int col = 0; col < s; col++) {
+          if (graph[row][col] > 0) {
+            // if (DEBUG) System.out.printf("Adding matrix[%d][%d]\n", row, col);
+            g.add(row, col, graph[row][col]);
+          }
+        }
+      }
+
+      // // Try 0 guards, then 1, etc.
+			// if (!solvable(graph, NUM_STUDENTS, 0))
+			// 	System.out.println("0");
+			// else {
+      //   if (DEBUG) System.out.println("Passed the first one");
+			// 	int tryval = 1;
+			// 	while (solvable(graph, NUM_STUDENTS, tryval)) tryval++;
+			// 	System.out.println(tryval-1);
+			// }
+
+      // int ans = g.ff();
+      // if (ans == 168)
+      //   System.out.printf("Case #%d: YES\n", c + 1);
+      // else
+      //   System.out.printf("Case #%d: NO\n", c + 1);
+
+      boolean ans = solvable(graph, NUM_STUDENTS, 2);
+      if (ans)
+        System.out.printf("Case #%d: YES\n\n", c + 1);
+      else
+        System.out.printf("Case #%d: NO\n\n", c + 1);
+    }
+  }
+
+// Returns true iff we can cover each shift with tryval guards.
+public static boolean solvable(int[][] graph, int n, int tryval) {
+
+  for (int[] e : graph) {
+    if (DEBUG) System.out.println(Arrays.toString(e));
+  }
+
+  int s = graph.length;
+  FordFulkerson myNetFlow = new FordFulkerson(n+168);
+  for (int i=0; i<s; i++)
+    for (int j=0; j<s; j++)
+      if (graph[i][j] > 0)
+        myNetFlow.add(i, j, graph[i][j]);
+
+  // Fill in the flows from all the shifts to the sink.
+  for (int j=0; j<168; j++)
+    myNetFlow.add(n+j, s-1, tryval);
+
+  int flow = myNetFlow.ff();
+  return flow == tryval*168;
 }
-// An edge connects v1 to v2 with a capacity of cap, flow of flow.
-class Edge {
-	int v1, v2, cap, flow;
-	Edge rev;
-	Edge(int V1, int V2, int Cap, int Flow) {
-		v1 = V1;
-		v2 = V2;
-		cap = Cap;
-		flow = Flow;
-	}
 }
 
-class Dinic {
 
-	// Queue for the top level BFS.
-	public ArrayDeque<Integer> q;
+class FordFulkerson {
 
-	// Stores the graph.
-	public ArrayList<Edge>[] adj;
+	// Stores graph.
+	public int[][] cap;
 	public int n;
+	public int source;
+	public int sink;
 
-	// s = source, t = sink
-	public int s;
-	public int t;
+	// "Infinite" flow.
+	final public static int oo = (int)(1E9);
 
-
-	// For BFS.
-	public boolean[] blocked;
-	public int[] dist;
-
-	final public static int oo = (int)1E9;
-
-	// Constructor.
-	public Dinic (int N) {
-
-		// s is the source, t is the sink, add these as last two nodes.
-		n = N; s = n++; t = n++;
-
-		// Everything else is empty.
-		blocked = new boolean[n];
-		dist = new int[n];
-		q = new ArrayDeque<Integer>();
-		adj = new ArrayList[n];
-		for(int i = 0; i < n; ++i)
-			adj[i] = new ArrayList<Edge>();
+	// Set up default flow network with size+2 vertices, size is source, size+1 is sink.
+	public FordFulkerson(int size) {
+		n = size + 2;
+		source = n - 2;
+		sink = n - 1;
+		cap = new int[n][n];
 	}
 
-	// Just adds an edge and ALSO adds it going backwards.
-	public void add(int v1, int v2, int cap, int flow) {
-		Edge e = new Edge(v1, v2, cap, flow);
-		Edge rev = new Edge(v2, v1, 0, 0);
-		adj[v1].add(rev.rev = e);
-		adj[v2].add(e.rev = rev);
+	// Adds an edge from v1 -> v2 with capacity c.
+	public void add(int v1, int v2, int c) {
+		cap[v1][v2] = c;
 	}
 
-	// Runs other level BFS.
-	public boolean bfs() {
+	// Wrapper function for Ford-Fulkerson Algorithm
+	public int ff() {
 
-		// Set up BFS
-		q.clear();
-		Arrays.fill(dist, -1);
-		dist[t] = 0;
-		q.add(t);
-
-		// Go backwards from sink looking for source.
-		// We just care to mark distances left to the sink.
-		while(!q.isEmpty()) {
-			int node = q.poll();
-			if(node == s)
-				return true;
-			for(Edge e : adj[node]) {
-				if(e.rev.cap > e.rev.flow && dist[e.v2] == -1) {
-					dist[e.v2] = dist[node] + 1;
-					q.add(e.v2);
-				}
-			}
-		}
-
-		// Augmenting paths exist iff we made it back to the source.
-		return dist[s] != -1;
-	}
-
-	// Runs inner DFS in Dinic's, from node pos with a flow of min.
-	public int dfs(int pos, int min) {
-
-		// Made it to the sink, we're good, return this as our max flow for the augmenting path.
-		if(pos == t)
-			return min;
+		// Set visited array and flow.
+		boolean[] visited = new boolean[n];
 		int flow = 0;
 
-		// Try each edge from here.
-		for(Edge e : adj[pos]) {
-			int cur = 0;
+		// Loop until no augmenting paths found.
+		while (true) {
 
-			// If our destination isn't blocked and it's 1 closer to the sink and there's flow, we
-			// can go this way.
-			if(!blocked[e.v2] && dist[e.v2] == dist[pos]-1 && e.cap - e.flow > 0) {
+			// Run one DFS.
+			Arrays.fill(visited, false);
+			int res = dfs(source, visited, oo);
 
-				// Recursively run dfs from here - limiting flow based on current and what's left on this edge.
-				cur = dfs(e.v2, Math.min(min-flow, e.cap - e.flow));
+			// Nothing found, get out.
+			if (res == 0) break;
 
-				// Add the flow through this edge and subtract it from the reverse flow.
-				e.flow += cur;
-				e.rev.flow = -e.flow;
-
-				// Add to the total flow.
-				flow += cur;
-			}
-
-			// No more can go through, we're good.
-			if(flow == min)
-				return flow;
+			// Add this flow.
+			flow += res;
 		}
 
-		// mark if this node is now blocked.
-		blocked[pos] = flow != min;
-
-		// This is the flow
+		// Return it.
 		return flow;
 	}
 
-	public int flow() {
-		clear();
-		int ret = 0;
+	// DFS to find augmenting math from v with maxflow at most min.
+	public int dfs(int v, boolean[] visited, int min) {
 
-		// Run a top level BFS.
-		while(bfs()) {
+		// got to the sink, this is our flow.
+		if (v == sink)  return min;
 
-			// Reset this.
-			Arrays.fill(blocked, false);
+		// We've been here before - no flow.
+		if (visited[v])  return 0;
 
-			// Run multiple DFS's until there is no flow left to push through.
-			ret += dfs(s, oo);
+		// Mark this node and recurse.
+		visited[v] = true;
+		int flow = 0;
+
+		// Just loop through all possible next nodes.
+		for (int i = 0; i < n; i++) {
+
+			// We can augment in this direction.
+			if (cap[v][i] > 0)
+				flow = dfs(i, visited, Math.min(cap[v][i], min));
+
+			// We got positive flow on this recursive route, return it.
+			if (flow > 0) {
+
+				// Subtract it going forward.
+				cap[v][i] -= flow;
+
+				// Add it going backwards, so that later, we can flow back through this edge as a backedge.
+				cap[i][v] += flow;
+
+				// Return this flow.
+				return flow;
+			}
 		}
-		return ret;
-	}
 
-	// Just resets flow through all edges to be 0.
-	public void clear() {
-		for(ArrayList<Edge> edges : adj)
-			for(Edge e : edges)
-				e.flow = 0;
+		// If we get here there was no flow.
+		return 0;
 	}
 }
