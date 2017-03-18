@@ -8,7 +8,8 @@ import java.util.*;
 public class campout {
 	public static final boolean DEBUG = true;
 	public static final int NUM_STUDENTS = 10;
-	public static final int NUM_SHIFTS = 6;
+	public static final int offset = NUM_STUDENTS + 1; // +1 b/c of the source
+	public static Dinic myNetFlow;
 
 	public static void main(String[] args) {
 
@@ -17,180 +18,124 @@ public class campout {
 
 		for (int c = 0; c < nCases; c++) {
 			// 0 = src, s-1 = sink, 1-n students, n+1 -> shifts
-			int s = NUM_STUDENTS + (NUM_SHIFTS * 7 * 24) + 2;
+			int s = NUM_STUDENTS + (7 * 24) + 2;
 			int[][] graph = new int[s][s];
 
 			// Initialize the availability graph
 			for (int i = 0; i < s; i++) {
-				Arrays.fill(graph[i], 0);
+				Arrays.fill(graph[i], 1);
 			}
 
+
+			// Link source to all students
+			Arrays.fill(graph[0], 0);
+			graph[0][s-1] = 0; // Unlink the source from the sink
+			for (int j = 1; j <= NUM_STUDENTS; j++) {
+				graph[0][j] = 1;
+				graph[j][s-1] = 0; // unlink the preson from the sink
+			}
+
+			for (int j = 0; j < s; j++) {
+				// Nothing should link back to the source
+				graph[j][0] = 0;
+			}
+
+
 			// Read in person-by-person
-			for (int j = 0; j < NUM_STUDENTS; j++) {
+			for (int j = 1; j <= NUM_STUDENTS; j++) {
 				int nBusyTimes = stdin.nextInt();
+				// For each time the student is busy...
 				for (int k = 0; k < nBusyTimes; k++) {
+					// Get the day and times they are unavailable
 					int day = stdin.nextInt();
 					int startHour = stdin.nextInt();
 					int endHour = stdin.nextInt();
-					// Change the day and time to the indices on graph and update them
-
 					int weekStartHour = ((day - 1) * 24) + startHour;
 					int weekEndHour = ((day - 1) * 24) + endHour;
 
-					if (DEBUG) System.out.printf("#%d) day(%d) start(%d) end(%d) ws(%d) we(%d)\n", j + 1, day, startHour, endHour, weekStartHour, weekEndHour);
+					// if (DEBUG) System.out.printf("#%d) day(%d) start(%d) end(%d) ws(%d) we(%d)\n", j + 1, day, startHour, endHour, weekStartHour, weekEndHour);
 
+					// Change the day and time to the indices on graph and update them
 					// 00:00 - 04:00
-					if ((startHour > 0 && startHour < 4) || (endHour > 0 && endHour < 0))
+					if ((startHour >= 0 && startHour < 4) || (endHour >= 0 && endHour < 4))
 						for (int t = weekStartHour; t <= weekEndHour; t++) {
-							graph[j][t]++;
+							// if (DEBUG) System.out.println("Adding to the graph: " + t);
+							graph[j][t + offset] = 0;
 						}
 
 					// 04:00 - 08:00
-					if ((startHour > 4 && startHour < 8) || (endHour > 4 && endHour < 8))
+					if ((startHour >= 4 && startHour < 8) || (endHour >= 4 && endHour < 8))
 						for (int t = weekStartHour; t <= weekEndHour; t++) {
-							graph[j][t]++;
+							// if (DEBUG) System.out.println("Adding to the graph: " + t);
+							graph[j][t + offset] = 0;
 						}
 
 					// 08:00 - 12:00
-					if ((startHour > 8 && startHour < 12) || (endHour > 8 && endHour < 12))
+					if ((startHour >= 8 && startHour < 12) || (endHour >= 8 && endHour < 12))
 						for (int t = weekStartHour; t <= weekEndHour; t++) {
-							graph[j][t]++;
+							// if (DEBUG) System.out.println("Adding to the graph: " + t);
+							graph[j][t + offset] = 0;
 						}
 
 					// 12:00 - 16:00
-					if ((startHour > 12 && startHour < 16) || (endHour > 12 && endHour < 16))
+					if ((startHour >= 12 && startHour < 16) || (endHour >= 12 && endHour < 16))
 						for (int t = weekStartHour; t <= weekEndHour; t++) {
-							graph[j][t]++;
+							// if (DEBUG) System.out.println("Adding to the graph: " + t);
+							graph[j][t + offset] = 0;
 						}
 
 					// 16:00 - 20:00
-					if ((startHour > 16 && startHour < 20) || (endHour > 16 && endHour < 20))
+					if ((startHour >= 16 && startHour < 20) || (endHour >= 16 && endHour < 20))
 						for (int t = weekStartHour; t <= weekEndHour; t++) {
-							graph[j][t]++;
+							// if (DEBUG) System.out.println("Adding to the graph: " + t);
+							graph[j][t + offset] = 0;
 						}
 
 					// 20:00 - 24:00
-					if ((startHour > 20 && startHour < 24) || (endHour > 20 && endHour < 24))
+					if ((startHour >= 20 && startHour < 24) || (endHour >= 20 && endHour < 24))
 						for (int t = weekStartHour; t <= weekEndHour; t++) {
-							graph[j][t]++;
+							// if (DEBUG) System.out.println("Adding to the graph: " + t);
+							graph[j][t + offset] = 0;
 						}
 				}
-
-				for (int[] e : graph) {
-					if (DEBUG) System.out.println(Arrays.toString(e));
-				}
-
 			}
 
+			for (int[] e : graph) {
+				if (DEBUG) System.out.println(Arrays.toString(e));
+			}
 
-
-			// // 0 = source, s-1 = sink, 1-n guards, n+1 -> n+48 shifts
-			// int s = NUM_STUDENTS + 2 + 168;
-			// int[][] graph = new int[s][s];
-			// for (int i=0; i<s; i++)
-			// 	Arrays.fill(graph[i], 0);
-			//
-			// // Read in each guard.
-			// for (int i=0; i < NUM_STUDENTS; i++) {
-			// 	int shifts = stdin.nextInt();
-			// 	int max = stdin.nextInt();
-			// 	boolean[] available = new boolean[1440];
-			// 	Arrays.fill(available, false);
-			//
-			// 	// Fill in guard's availability.
-			// 	for (int j=0; j<shifts; j++) {
-			// 		String t1 = stdin.next();
-			// 		String t2 = stdin.next();
-			// 		fillArray(convert(t1), convert(t2), available);
-			// 	}
-			//
-			// 	// Convert the minutes to 30 minute availability slots.
-			// 	int[] slots = getSlots(available);
-			//
-			// 	// These are the flows we want.
-			// 	graph[s-2][i] = max/30;
-			// 	for (int j=0; j<slots.length; j++) {
-			// 		graph[i][NUM_STUDENTS+j] = slots[j];
-			// 	}
-			// }
-			//
-			// // Try 0 guards, then 1, etc.
-			// if (!solvable(graph, NUM_STUDENTS, 1))
-			// 	System.out.println("0");
-			// else {
-			// 	int tryval = 1;
-			// 	while (solvable(graph, NUM_STUDENTS, tryval)) tryval++;
-			// 	System.out.println(tryval-1);
+			// Try 0 guards, then 1, etc.
+			if (!solvable(graph, NUM_STUDENTS, 0))
+				System.out.println("0");
+			else {
+				int tryval = 1;
+				while (solvable(graph, NUM_STUDENTS, tryval)) tryval++;
+				System.out.println(tryval-1);
 			}
 		}
 	}
+	// Returns true iff we can cover each shift with tryval guards.
+	public static boolean solvable(int[][] graph, int n, int tryval) {
 
-// 	// Returns true iff we can cover each shift with tryval guards.
-// 	public static boolean solvable(int[][] graph, int n, int tryval) {
-//
-// 		int s = graph.length;
-// 		Dinic myNetFlow = new Dinic(n+48);
-// 		for (int i=0; i<s; i++)
-// 			for (int j=0; j<s; j++)
-// 				if (graph[i][j] > 0)
-// 					myNetFlow.add(i, j, graph[i][j], 0);
-//
-// 		// Fill in the flows from all the shifts to the sink.
-// 		for (int j=0; j<48; j++)
-// 			myNetFlow.add(n+j, s-1, tryval, 0);
-//
-// 		int flow = myNetFlow.flow();
-// 		return flow == tryval*48;
-// 	}
-//
-// 	// Returns the number of minutes after midnight represented by s.
-// 	public static int convert(String s) {
-// 		int hr = 10*(s.charAt(0) - '0') + s.charAt(1) - '0';
-// 		int min = 10*(s.charAt(3) - '0') + s.charAt(4) - '0';
-// 		return 60*hr + min;
-// 	}
-//
-// 	// Fills available in interval [start, end) if start < end.
-// 	// Or [start, 1439], [0, end) if end < start. Or all slots if start == end.
-// 	public static void fillArray(int start, int end, boolean[] available) {
-//
-// 		// Easy case.
-// 		if (start == end) Arrays.fill(available, true);
-//
-// 		// Standard case.
-// 		if (start < end) {
-// 			for (int i=start; i<end; i++)
-// 				available[i] = true;
-// 		}
-//
-// 		// Loop through midnight.
-// 		else {
-// 			for (int i=0; i<end; i++)
-// 				available[i] = true;
-// 			for (int i=start; i<available.length; i++)
-// 				available[i] = true;
-// 		}
-// 	}
-//
-// 	// Convert minute availability to 30 minute time slots.
-// 	public static int[] getSlots(boolean[] array) {
-//
-// 		int[] slots = new int[48];
-// 		for (int i=0; i<slots.length; i++) {
-//
-// 			// Make sure we can make all 30 minutes before being available for this slot.
-// 			int ans = 1;
-// 			for (int j=0; j<30; j++)
-// 				if (!array[30*i+j]) {
-// 					ans = 0;
-// 					break;
-// 				}
-// 			slots[i] = ans;
-// 		}
-// 		return slots;
-// 	}
-// }
+		int s = graph.length;
+		myNetFlow = new Dinic(n+168);
+		for (int i=0; i<s; i++)
+			for (int j=0; j<s; j++)
+				if (graph[i][j] > 0)
+					myNetFlow.add(i, j, graph[i][j], 0);
 
+		// Fill in the flows from all the shifts to the sink.
+		for (int j=0; j<168; j++)
+			myNetFlow.add(n+j, s-1, tryval, 0);
+
+		int flow = myNetFlow.flow();
+		return flow == tryval*168;
+	}
+
+
+
+
+}
 // An edge connects v1 to v2 with a capacity of cap, flow of flow.
 class Edge {
 	int v1, v2, cap, flow;
