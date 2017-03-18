@@ -1,9 +1,9 @@
 import java.util.*;
 
 public class campout {
-  public static final boolean DEBUG = true;
+  public static final boolean DEBUG = false;
   public static final int NUM_STUDENTS = 10;
-  public static final int offset = NUM_STUDENTS + 1; // +1 b/c of the source
+  public static final int offset = NUM_STUDENTS; // +1 b/c of the source
 
   public static void main(String[] args) {
 
@@ -41,33 +41,6 @@ public class campout {
       for (int j = NUM_STUDENTS; j < s; j++) {
         Arrays.fill(graph[j], NUM_STUDENTS, s - 1, 0);
       }
-
-
-      // // Shifts
-      // // Unlink all shifts from one another
-      // for (int j = NUM_STUDENTS; j < s - 2; j++)
-      //   Arrays.fill(graph[j], NUM_STUDENTS, s - 2, 0);
-      //
-      // // Source
-      // // Unlink the source from the shifts, itself, and the sink
-      // Arrays.fill(graph[s - 2], NUM_STUDENTS, s - 2, 0);
-      // // Nothing should link back to the source
-      // for (int j = 0; j < s; j++) {
-      //   graph[j][s - 2] = 0;
-      // }
-      // // Source should not link to the sink
-      // graph[s - 2][s - 1] = 0;
-      //
-      // // Sink
-      // // Students should not link to the sink
-      // for (int j = 0; j < NUM_STUDENTS; j++)
-      //   graph[j][s - 1] = 0;
-
-      // for (int[] e : graph) {
-      //   if (DEBUG) System.out.println(Arrays.toString(e));
-      // }
-      // System.exit(0);
-
 
       // Read in person-by-person
       for (int j = 0; j < NUM_STUDENTS; j++) {

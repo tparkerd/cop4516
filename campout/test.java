@@ -3,7 +3,7 @@ import java.util.*;
 public class test {
   public static final boolean DEBUG = false;
   public static final int NUM_STUDENTS = 10;
-  public static final int offset = NUM_STUDENTS + 1; // +1 b/c of the source
+  public static final int offset = NUM_STUDENTS;
 
   public static void main(String[] args) {
 
