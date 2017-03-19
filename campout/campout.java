@@ -3,8 +3,8 @@ import java.util.*;
 public class campout {
   public static final boolean DEBUG = true;
   public static final int NUM_STUDENTS = 10;
-  public static final int offset = NUM_STUDENTS;
   public static final int NUM_HOURS = 168;
+  public static final int MAX_HOURS = 80;
 
   public static void main(String[] args) {
 
@@ -32,7 +32,7 @@ public class campout {
       for (int j = 0; j < s - 2; j++)
         Arrays.fill(graph[j], 0, NUM_STUDENTS, 0);
       // Link source to all students
-      Arrays.fill(graph[s - 2], 0, NUM_STUDENTS, NUM_HOURS); // 168 hours max can be worked per student
+      Arrays.fill(graph[s - 2], 0, NUM_STUDENTS, MAX_HOURS); // 168 hours max can be worked per student
       // Students cannot link to the sink or source
       for (int j = 0; j < NUM_STUDENTS; j++) {
         graph[j][s - 2] = 0;
@@ -61,45 +61,39 @@ public class campout {
           // If the busy period overlaps with any of the following shifts,
           // remove the edge from the graph
           // 00:00 - 04:00
-          if ((startHour >= 0 && startHour < 4) || (endHour >= 0 && endHour < 4))
-            for (int t = weekStartHour; t <= weekEndHour; t++) {
-              if (DEBUG) System.out.println("Removeing edge: Person(" + (j + 1) + ") Shift(" + t + ")");
-              graph[j][t + offset] = 0;
+          if ((startHour >= 0 && startHour < 4) || (endHour >= 0 && endHour < 4)) {
+              if (DEBUG) System.out.println("Removing edge: Person(" + (j + 1) + ") Shift(" + weekStartHour + ")");
+              Arrays.fill(graph[j], ((day - 1) * 24) + NUM_STUDENTS, ((day - 1) * 24) + NUM_STUDENTS + 4, 0);
             }
 
           // 04:00 - 08:00
-          if ((startHour >= 4 && startHour < 8) || (endHour >= 4 && endHour < 8))
-            for (int t = weekStartHour; t <= weekEndHour; t++) {
-              if (DEBUG) System.out.println("Removeing edge: Person(" + (j + 1) + ") Shift(" + t + ")");
-              graph[j][t + offset] = 0;
+          if ((startHour >= 4 && startHour < 8) || (endHour >= 4 && endHour < 8)) {
+            Arrays.fill(graph[j], ((day - 1) * 24) + NUM_STUDENTS + 4, ((day - 1) * 24) + NUM_STUDENTS + 8, 0);
+            if (DEBUG) System.out.println("Removeing edge: Person(" + (j + 1) + ") Shift(" + weekStartHour + ")");
             }
 
           // 08:00 - 12:00
-          if ((startHour >= 8 && startHour < 12) || (endHour >= 8 && endHour < 12))
-            for (int t = weekStartHour; t <= weekEndHour; t++) {
-              if (DEBUG) System.out.println("Removeing edge: Person(" + (j + 1) + ") Shift(" + t + ")");
-              graph[j][t + offset] = 0;
+          if ((startHour >= 8 && startHour < 12) || (endHour >= 8 && endHour < 12)) {
+            Arrays.fill(graph[j], ((day - 1) * 24) + NUM_STUDENTS + 8, ((day - 1) * 24) + NUM_STUDENTS + 12, 0);
+            if (DEBUG) System.out.println("Removeing edge: Person(" + (j + 1) + ") Shift(" + weekStartHour + ")");
             }
 
           // 12:00 - 16:00
-          if ((startHour >= 12 && startHour < 16) || (endHour >= 12 && endHour < 16))
-            for (int t = weekStartHour; t <= weekEndHour; t++) {
-              if (DEBUG) System.out.println("Removeing edge: Person(" + (j + 1) + ") Shift(" + t + ")");
-              graph[j][t + offset] = 0;
+          if ((startHour >= 12 && startHour < 16) || (endHour >= 12 && endHour < 16)) {
+            Arrays.fill(graph[j], ((day - 1) * 24) + NUM_STUDENTS + 12, ((day - 1) * 24) + NUM_STUDENTS + 16, 0);
+            if (DEBUG) System.out.println("Removeing edge: Person(" + (j + 1) + ") Shift(" + weekStartHour + ")");
             }
 
           // 16:00 - 20:00
-          if ((startHour >= 16 && startHour < 20) || (endHour >= 16 && endHour < 20))
-            for (int t = weekStartHour; t <= weekEndHour; t++) {
-              if (DEBUG) System.out.println("Removeing edge: Person(" + (j + 1) + ") Shift(" + t + ")");
-              graph[j][t + offset] = 0;
+          if ((startHour >= 16 && startHour < 20) || (endHour >= 16 && endHour < 20)) {
+            Arrays.fill(graph[j], ((day - 1) * 24) + NUM_STUDENTS + 16, ((day - 1) * 24) + NUM_STUDENTS + 20, 0);
+            if (DEBUG) System.out.println("Removeing edge: Person(" + (j + 1) + ") Shift(" + weekStartHour + ")");
             }
 
           // 20:00 - 24:00
-          if ((startHour >= 20 && startHour < 24) || (endHour >= 20 && endHour < 24))
-            for (int t = weekStartHour; t <= weekEndHour; t++) {
-              if (DEBUG) System.out.println("Removeing edge: Person(" + (j + 1) + ") Shift(" + t + ")");
-              graph[j][t + offset] = 0;
+          if ((startHour >= 20 && startHour < 24) || (endHour >= 20 && endHour < 24)) {
+            Arrays.fill(graph[j], ((day - 1) * 24) + NUM_STUDENTS + 20, ((day - 1) * 24) + NUM_STUDENTS + 24, 0);
+            if (DEBUG) System.out.println("Removeing edge: Person(" + (j + 1) + ") Shift(" + weekStartHour + ")");
             }
         }
       }
@@ -111,7 +105,30 @@ public class campout {
       // This part is what I'm not sure about, well, that and the graph, but I'm
       // less confident of this part than the graph. The actual network flow  graph
       // is created inside of the solvable function.
-      boolean ans = solvable(graph, NUM_STUDENTS, 2);
+      // boolean ans = solvable(graph, NUM_STUDENTS, 3);
+      // if (ans)
+      //   System.out.printf("Case #%d: YES\n\n", c + 1);
+      // else
+      //   System.out.printf("Case #%d: NO\n\n", c + 1);
+      // Try 0 guards, then 1, etc.
+      for (int[] e : graph) {
+        if (DEBUG) System.out.println(Arrays.toString(e));
+      }
+
+      int length = graph.length;
+      FordFulkerson myNetFlow = new FordFulkerson(NUM_STUDENTS + NUM_HOURS);
+      for (int m=0; m<length; m++)
+        for (int n=0; n<length; n++)
+          if (graph[m][n] > 0)
+            myNetFlow.add(m, n, graph[m][n]);
+
+      // Fill in the flows from all the shifts to the sink.
+      for (int n = 0; n <NUM_HOURS; n++)
+        myNetFlow.add(NUM_STUDENTS + n, s-1, 3);
+
+      int flow = myNetFlow.ff();
+      boolean ans = (flow == 3 * NUM_HOURS);
+
       if (ans)
         System.out.printf("Case #%d: YES\n\n", c + 1);
       else
@@ -119,27 +136,27 @@ public class campout {
     }
   }
 
-// Returns true iff we can cover each shift with tryval students
-public static boolean solvable(int[][] graph, int n, int tryval) {
+  // Returns true iff we can cover each shift with tryval students
+  public static boolean solvable(int[][] graph, int n, int tryval) {
 
-  for (int[] e : graph) {
-    if (DEBUG) System.out.println(Arrays.toString(e));
+    for (int[] e : graph) {
+      if (DEBUG) System.out.println(Arrays.toString(e));
+    }
+
+    int s = graph.length;
+    FordFulkerson myNetFlow = new FordFulkerson(n+NUM_HOURS);
+    for (int i=0; i<s; i++)
+      for (int j=0; j<s; j++)
+        if (graph[i][j] > 0)
+          myNetFlow.add(i, j, graph[i][j]);
+
+    // Fill in the flows from all the shifts to the sink.
+    for (int j=0; j<NUM_HOURS; j++)
+      myNetFlow.add(n+j, s-1, tryval);
+
+    int flow = myNetFlow.ff();
+    return flow == tryval*NUM_HOURS;
   }
-
-  int s = graph.length;
-  FordFulkerson myNetFlow = new FordFulkerson(n+NUM_HOURS);
-  for (int i=0; i<s; i++)
-    for (int j=0; j<s; j++)
-      if (graph[i][j] > 0)
-        myNetFlow.add(i, j, graph[i][j]);
-
-  // Fill in the flows from all the shifts to the sink.
-  for (int j=0; j<NUM_HOURS; j++)
-    myNetFlow.add(n+j, s-1, tryval);
-
-  int flow = myNetFlow.ff();
-  return flow == tryval*NUM_HOURS;
-}
 }
 
 
