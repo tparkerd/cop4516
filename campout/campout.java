@@ -65,41 +65,69 @@ public class campout {
           // The logic is that if the start of a shift falls within a busy
           // period or the shift ends within the busy period, there is some
           // overlap, so remove the shift from their availability schedule
+
+          // There are four cases for overlap
+          // 0) No overlap
+          // 1) Starts before shift, ends within shift
+          // 2) Starts within shift, ends within shift
+          // 3) Start within shift, end after shift
+          // 4) Start before shift, end after shift
+
           // 00:00 - 04:00
-          if (4 > startHour) {
-            if (DEBUG) System.out.println((j + 1) + ") Block shift: " + offset + " - " + (offset + 0));
+          if (startHour < 4) {
+            if (DEBUG) System.out.println((j + 1) + ") Block shift: " + offset + " - " + (offset + 4));
             Arrays.fill(graph[j], offset, offset + 4, 0);
           }
 
           // 04:00 - 08:00
-          if ((4 >= startHour && 4 < endHour) || (8 > startHour && 8 <= endHour)) {
-            if (DEBUG) System.out.println((j + 1) + ") Block shift: " + (offset + 4) + " - " + (offset + 8));
-            Arrays.fill(graph[j], offset + 4, offset + 8, 0);
-          }
+          if ( (startHour < 4 && (endHour > 4 && endHour <= 8))                     || // case 1: before
+               ((startHour >= 4 && startHour < 8) && (endHour > 4 && endHour <= 8)) || // case 2: within
+               ((startHour >= 4 && startHour < 8) && endHour > 8)                   || // case 3: after
+               ((startHour <= 4 && endHour >= 8))                                      // case 4: entire
+              ) {
+                if (DEBUG) System.out.println((j + 1) + ") Block shift: " + (offset + 4) + " - " + (offset + 8));
+                Arrays.fill(graph[j], offset + 4, offset + 8, 0);
+              }
 
           // 08:00 - 12:00
-          if ((8 >= startHour && 8 < endHour) || (12 > startHour && 12 <= endHour)) {
-            if (DEBUG) System.out.println((j + 1) + ") Block shift: " + (offset + 8) + " - " + (offset + 12));
-            Arrays.fill(graph[j], offset + 8, offset + 12, 0);
-          }
+          if ( (startHour < 8 && (endHour > 8 && endHour <= 12))                     || // case 1: before
+              ((startHour >= 8 && startHour < 12) && (endHour > 8 && endHour <= 12)) || // case 2: within
+              ((startHour >= 8 && startHour < 12) && endHour > 12)                   || // case 3: after
+              ((startHour <= 8 && endHour >= 12))                                       // case 4: entire
+            ) {
+              if (DEBUG) System.out.println((j + 1) + ") Block shift: " + (offset + 4) + " - " + (offset + 8));
+              Arrays.fill(graph[j], offset + 8, offset + 12, 0);
+            }
 
           // 12:00 - 16:00
-          if ((12 >= startHour && 12 < endHour) || (16 > startHour && 16 <= endHour)) {
-            if (DEBUG) System.out.println((j + 1) + ") Block shift: " + (offset + 12) + " - " + (offset + 16));
-            Arrays.fill(graph[j], offset + 12, offset + 16, 0);
-          }
+          if ( (startHour < 12 && (endHour > 12 && endHour <= 16))                     || // case 1: before
+              ((startHour >= 12 && startHour < 16) && (endHour > 12 && endHour <= 16)) || // case 2: within
+              ((startHour >= 12 && startHour < 16) && endHour > 16)                    || // case 3: after
+              ((startHour <= 12 && endHour >= 16))                                        // case 4: entire
+            ) {
+              if (DEBUG) System.out.println((j + 1) + ") Block shift: " + (offset + 4) + " - " + (offset + 8));
+              Arrays.fill(graph[j], offset + 12, offset + 16, 0);
+            }
 
           // 16:00 - 20:00
-          if ((16 >= startHour && 16 < endHour) || ( 20 > startHour && 20 <= endHour)) {
-            if (DEBUG) System.out.println(j + ") Block shift: " + (offset + 16) + " - " + (offset + 20));
-            Arrays.fill(graph[j], offset + 16, offset + 20, 0);
-          }
+          if ( (startHour < 16 && (endHour > 16 && endHour <= 20))                     || // case 1: before
+              ((startHour >= 16 && startHour < 20) && (endHour > 16 && endHour <= 20)) || // case 2: within
+              ((startHour >= 16 && startHour < 20) && endHour > 20)                    || // case 3: after
+              ((startHour <= 16 && endHour >= 20))                                        // case 4: entire
+            ) {
+              if (DEBUG) System.out.println((j + 1) + ") Block shift: " + (offset + 4) + " - " + (offset + 8));
+              Arrays.fill(graph[j], offset + 16, offset + 20, 0);
+            }
 
           // 20:00 - 24:00
-          if (20 <= endHour) {
-            if (DEBUG) System.out.println((j + 1) + ") Block shift: " + (offset + 20) + " - " + (offset + 24));
-            Arrays.fill(graph[j], offset + 20, offset + 24, 0);
-          }
+          if ( (startHour < 20 && (endHour > 20 && endHour <= 24))                     || // case 1: before
+              ((startHour >= 20 && startHour < 24) && (endHour > 20 && endHour <= 24)) || // case 2: within
+              ((startHour >= 20 && startHour < 24) && endHour > 24)                    || // case 3: after
+              ((startHour <= 20 && endHour >= 24))                                        // case 4: entire
+            ) {
+              if (DEBUG) System.out.println((j + 1) + ") Block shift: " + (offset + 4) + " - " + (offset + 8));
+              Arrays.fill(graph[j], offset + 20, offset + 24, 0);
+            }
         }
       }
 
