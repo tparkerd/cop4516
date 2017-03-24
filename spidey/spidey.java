@@ -15,16 +15,15 @@ public class spidey {
 		// For each case...
 		caseLoop: // label so I can skip case if it has same-side edges
 		for (int i = 0; i < nCases; i++) {
+			boolean isValidGraph = true;
 			if (DEBUG) System.out.printf("%d] ", i + 1);
 			// Get the number nodes and the edges
 			int nVertices = stdin.nextInt();
 			// Base case: if there aren't any vertices
-			if (nVertices == 0) {
+			if (nVertices == 0 || nVertices == 1) {
 				if (DEBUG) System.out.println("Zero vertices");
 				// Read in the number of edges to move along to the next case
-				stdin.nextInt();
-				System.out.println(failureString);
-				continue;
+				isValidGraph = false;
 			}
 			// Make a new graph
 			graph = new ArrayList[nVertices];
@@ -38,10 +37,8 @@ public class spidey {
 				int v2 = stdin.nextInt();
 				// Check if there is any web that connects same sides
 				if ((v1 % 2) == (v2 % 2)) {
-					System.out.println(failureString);
-					continue caseLoop;
+					isValidGraph = false;
 				}
-
 				// Add the edge to the graph
 				graph[v1].add(v2);
 				graph[v2].add(v1);
@@ -52,7 +49,7 @@ public class spidey {
 				if (DEBUG) System.out.println((debug) + ") " +graph[debug].toString());
 			}
 
-			if (bfs(graph)) {
+			if (isValidGraph && bfs(graph)) {
 				System.out.println(successString);
 			} else {
 				System.out.println(failureString);
