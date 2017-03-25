@@ -1,9 +1,6 @@
 import java.util.*;
 
 public class lotto {
-  public static final boolean DEBUG = false;
-  public static int counter;
-
   public static void main(String[] args) {
     Scanner stdin = new Scanner(System.in);
 
@@ -29,13 +26,11 @@ public class lotto {
         s[i][j] = init(new int[i], j, 0);
 
     // Precompute all solutions within the range
+    // All of row 1 is made up of base cases, so start on the row 2
     for (int i = 2; i < s.length; i++)
       for (int j = (int)Math.pow(2, i - 1); j < s[0].length; j++)
+        //      = [Up 1][Left 2^(i - 2)]              + [Same row][Left 2^(i - 1)]
         s[i][j] = s[i-1][j - (int)Math.pow(2, i - 2)] + s[i][j - (int)Math.pow(2, i - 1)];
-
-    if (DEBUG) System.out.println("Show Solution Array");
-    for (int i = 0; i < s.length; i++)
-      if (DEBUG) System.out.println(Arrays.toString(s[i]));
 
     // Get the first case
     int digits = stdin.nextInt();
@@ -63,7 +58,6 @@ public class lotto {
       }
     }
     if (k == digits.length) {
-      // if (DEBUG) System.out.println(Arrays.toString(digits));
       return 1;
     }
     long sum = 0;
