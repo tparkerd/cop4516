@@ -39,18 +39,10 @@ public class lotto {
 
   public static void odometer(int[] digits, int numDigits, int k) {
     // Make sure the sub-permutation is valid first
-    for (int i = 0; i < k - 1; i++) {
-      if ((digits[i] * 2) > digits[i + 1]) {
-        // System.out.println("ERROR, NOT CORRECT PERM");
-        return;
-      }
-    }
+    if (k >= 2 && (digits[k - 2] * 2) >= digits[k - 1])
+      return;
 
     if (k == digits.length) {
-      // System.out.printf("Call: odometer(%s, %d, %d)\n", Arrays.toString(digits), numDigits, k);
-      // System.out.println("Test for valid perm");
-      // See if each each value is twice or more than the previous one
-
       counter++;
       if (DEBUG) System.out.println(Arrays.toString(digits));
       return;
