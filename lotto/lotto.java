@@ -1,59 +1,58 @@
 import java.util.*;
 
 public class lotto {
-  public static final boolean DEBUG = true;
+  public static final boolean DEBUG = false;
   public static int counter;
 
   public static void main(String[] args) {
     Scanner stdin = new Scanner(System.in);
 
-    int n = 10;
-    int m = 20;
+    // Rows (n) are the number of digits on the ticket
+    int n = 1;
+    // Columns are the range of digits, when m = 10, it's 1 to 10, inclusive.
+    int m = 2000;
 
-    // Row is the starting number, column is the upper limit value
-    int[][] s = new int[n + 1][m + 1];
+    // Assignment specs states no more than 10 numbers to a ticket, so to be
+    // inclusive, n is 11.
+    long[][] s = new long[11][m + 1];
+    // Where there are no digits on the ticket, there's no valid ticket.
+    // Where there is a range of zero, there's no valid ticket.
+    // Doing this shifts the indices so you can just use s[2][200] to get
+    // the exact number of tickets for a two-number ticket whose numbers range
+    // from 1 to 200, inclusive.
     Arrays.fill(s[0], 0);
     for (int i = 0; i < n; i++) s[i][0] = 0;
-    for (int i = 0; i < s.length; i++) {
+
+    // Initialize the base case of just a single digit ticket
+    for (int i = 1; i <= n; i++)
+      for ( int j = i; j <= m; j++)
+        s[i][j] = init(new int[i], j, 0);
+
+    // Precompute all solutions within the range
+    for (int i = 2; i < s.length; i++)
+      for (int j = (int)Math.pow(2, i - 1); j < s[0].length; j++)
+        s[i][j] = s[i-1][j - (int)Math.pow(2, i - 2)] + s[i][j - (int)Math.pow(2, i - 1)];
+
+    if (DEBUG) System.out.println("Show Solution Array");
+    for (int i = 0; i < s.length; i++)
       if (DEBUG) System.out.println(Arrays.toString(s[i]));
+
+    // Get the first case
+    int digits = stdin.nextInt();
+    int range = stdin.nextInt();
+
+    // For each test case...
+    int cCase = 1;
+    while (digits != 0 && range != 0) {
+      System.out.printf("Case %d: n = %d, m = %d, # lists = %d\n", cCase++, digits, range, s[digits][range]);
+
+      // Get next case.
+      digits = stdin.nextInt();
+      range = stdin.nextInt();
     }
-
-    System.out.println();
-
-    // odometer(new int[n], m, 0);
-
-    for (int i = 1; i <= 8; i++) { // number of digits
-      for ( int j = i; j < m; j++) { // range of digits
-        s[i][j] = odometer(new int[i], j, 0);
-      }
-    }
-
-    for (int i = 0; i < s.length; i++) {
-      if (DEBUG) System.out.println(Arrays.toString(s[i]));
-    }
-    //
-    // // Get the first case
-    // int n = stdin.nextInt();
-    // int m = stdin.nextInt();
-    // counter = 0;
-    //
-    // // For each test case...
-    // int cCase = 1;
-    // while (n != 0 && m != 0) {
-    //   boolean[] used = new boolean[m];
-    //   Arrays.fill(used, false);
-    //   // if (DEBUG) System.out.println(Arrays.toString(used));
-    //   // odometer(new int[n], m, 0);
-    //   System.out.printf("Case %d: n = %d, m = %d, # lists = %d\n", cCase++, n, m, counter);
-    //
-    //   // Get next case.
-    //   n = stdin.nextInt();
-    //   m = stdin.nextInt();
-    //   counter = 0;
-    // }
   }
 
-  public static int odometer(int[] digits, int numDigits, int k) {
+  public static long init(int[] digits, int numDigits, int k) {
     // Base case: not viable start perm
     if (digits.length > numDigits) return 0;
 
@@ -64,40 +63,14 @@ public class lotto {
       }
     }
     if (k == digits.length) {
-      counter++;
-      if (DEBUG) System.out.println(Arrays.toString(digits));
+      // if (DEBUG) System.out.println(Arrays.toString(digits));
       return 1;
     }
-    int sum = 0;
+    long sum = 0;
     for (int i = 1; i <= numDigits; i++) {
       digits[k] = i;
-      sum += odometer(digits, numDigits, k + 1);
+      sum += init(digits, numDigits, k + 1);
     }
-    return sum;
-  }
-
-  public static int countPerms(int[] digits, int numDigits, int k) {
-    // // Base case: single digit
-    // if (k == 0 || k == 1) return 1;
-
-    // Make sure the sub-permutation is valid first
-    for (int i = 0; i < k - 1; i++) {
-      if ((digits[i] * 2) > digits[i + 1]) {
-        // System.out.println("ERROR, NOT CORRECT PERM");
-        return -1;
-      }
-    }
-
-    if (k == digits.length) {
-      if (DEBUG) System.out.println(Arrays.toString(digits));
-      return 0;
-    }
-    int sum = 0;
-    for (int i = 1; i <= numDigits; i++) {
-      digits[k] = i;
-      sum = countPerms(digits, numDigits, k + 1) + 1;
-    }
-
     return sum;
   }
 }
