@@ -132,8 +132,8 @@ class Target {
   }
 
   public double getDistanceTo(Target next) {
-    int xdist = Math.abs(this.x - next.x);
-    int ydist = Math.abs(this.y - next.y);
+    int xdist = this.x - next.x;
+    int ydist = this.y - next.y;
     return Math.sqrt( (xdist * xdist) + (ydist * ydist) );
   }
 }
