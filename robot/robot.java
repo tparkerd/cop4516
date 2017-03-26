@@ -1,19 +1,17 @@
 import java.util.*;
 
 public class robot {
-  public static final boolean DEBUG = false;
   static final int oo = (int) 1e9;
   static final int N = 1000;
   public static ArrayList<Edge>[] g;
 
+  @SuppressWarnings("unchecked")
   public static void main(String[] args) {
     Scanner stdin = new Scanner(System.in);
     int n = stdin.nextInt();
 
-
     // For each test case...
     while (n != 0) {
-      if (DEBUG) System.out.println("N: " + n);
       ArrayList<Target> list = new ArrayList<Target>();
       // Add the starting 'target'
       // NOTE(timp): I'm not sure if the penalty should be 0 or 1.
@@ -26,30 +24,16 @@ public class robot {
         int x = stdin.nextInt();
         int y = stdin.nextInt();
         int pen = stdin.nextInt();
-        if (DEBUG) System.out.printf("Add Target(%d, %d, %d, %d)\n", i, x, y, pen);
         list.add(new Target(i, x, y, pen));
       }
       // Add the destination target
       // This will later be used as the destination (d) for dijkstra's
       list.add(new Target(list.size(), 100, 100, 0));
-      if (DEBUG) System.out.println("List size: " + list.size());
-
-
-      // DEBUG
-      if (DEBUG) System.out.println("Show list");
-      for (Target t : list)
-        if (DEBUG) System.out.println(t);
 
       // Initialize empty graph
       g = new ArrayList[list.size() + 1];
       for (int i = 0; i < g.length; i++)
         g[i] = new ArrayList<Edge>();
-
-      // DEBUG
-      if (DEBUG) System.out.println("Show graph");
-      for (int i = 0; i < g.length; i++) {
-        if (DEBUG) System.out.println(i + ") " + g[i].toString());
-      }
 
       for (int i = 0; i < list.size(); i++) {
         // Keep track of penalty points for skipped targets and reset it
@@ -72,18 +56,11 @@ public class robot {
         }
       }
 
-      // DEBUG
-      if (DEBUG) System.out.println("Show graph 2");
-      for (int i = 0; i < g.length; i++) {
-        if (DEBUG) System.out.println(i + ") " + g[i].toString());
-      }
-
       // Answer!
       // The ending target is actually stored in the last item of the
       // original list of targets.
       double answer = dijkstras(0, list.size() - 1);
       // ...plus annoying formatting. As is, it includes trailing zeros.
-      // System.out.printf("%s\n", (new DecimalFormat("#.000").format(answer)));
       System.out.printf("%.3f\n", answer);
 
       // Next case
@@ -137,9 +114,6 @@ class Edge implements Comparable<Edge> {
     else
       return 0;
   }
-  public String toString() {
-    return "("+e+", "+w+")";
-  }
 }
 
 class Target {
@@ -159,11 +133,5 @@ class Target {
     int xdist = this.x - next.x;
     int ydist = this.y - next.y;
     return Math.sqrt( (xdist * xdist) + (ydist * ydist) );
-  }
-  // public String toString() {
-  //   return "::"+id+" ("+x+", "+y+") " + pen;
-  // }
-  public String toString() {
-    return x + " "  + y + " " + pen;
   }
 }
