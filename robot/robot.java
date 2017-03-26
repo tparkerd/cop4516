@@ -1,13 +1,10 @@
 import java.util.*;
-import java.math.*;
-import java.text.*;
 
 public class robot {
   static final int oo = (int) 1e9;
-  static final int N = 101;
+  static final int N = 100;
   public static ArrayList<Edge>[] g;
 
-  @SuppressWarnings("unchecked")
   public static void main(String[] args) {
     Scanner stdin = new Scanner(System.in);
     int n = stdin.nextInt();
@@ -30,10 +27,10 @@ public class robot {
       }
       // Add the destination target
       // This will later be used as the destination (d) for dijkstra's
-      list.add(new Target(list.size(), 100, 100, 0));
+      list.add(new Target(list.size(), N, N, 0));
 
       // Initialize empty graph
-      g = new ArrayList[101];
+      g = new ArrayList[N];
       for (int i = 0; i < g.length; i++)
         g[i] = new ArrayList<Edge>();
 
@@ -63,7 +60,8 @@ public class robot {
       // original list of targets.
       double answer = dijkstras(0, list.size() - 1);
       // ...plus annoying formatting. As is, it includes trailing zeros.
-      System.out.printf("%s\n", (new DecimalFormat("#.000").format(answer)));
+      // System.out.printf("%s\n", (new DecimalFormat("#.000").format(answer)));
+      System.out.printf("%.3f\n", answer);
 
       // Next case
       n = stdin.nextInt();
