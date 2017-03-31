@@ -44,24 +44,24 @@ public class mixedset {
       } else {
         // From the largest number, N, get the next valid value to add
         // to the combo
-        for (int j = used.length; j > 1; j--) {
+        int big;
+        for (int aBiggerNumber = used.length - 1; big > 1; big--)
           // Look back an extra slot, if it's used, use the currect value
-          if (used[j - 1]) {
-            // Check to see if the differences haven't been already used
-            for (int d = 0; d < k - 1; d++) {
-              // Difference between candidate and last added item
-              int tmp = Math.abs(j - combo[d]);
-              if (!diff[tmp]) {
-                diff[tmp] = true;
-              } else {
-                return; // Oops, we already used this difference, forget this.
-              }
-            } // End difference check
-          } // End find next largest candidate
-          combo[k] = j;
-          used[j] = true;
-          foo(combo, used, diff, k + 1);
-        }
+          if (used[big - 1]) break;
+
+        // Check to see if the differences haven't been already used
+        for (int d = 0; d < k - 1; d++) {
+          // Difference between candidate and last added item
+          int tmp = Math.abs(big - combo[d]);
+          if (!diff[tmp]) {
+            diff[tmp] = true;
+          } else {
+            return; // Oops, we already used this difference, forget this.
+          } // End difference check
+        } // End find next largest candidate
+        combo[k] = big;
+        used[big] = true;
+        foo(combo, used, diff, k + 1);
       }
     }
   }
