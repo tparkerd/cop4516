@@ -3,11 +3,13 @@ import java.util.*;
 public class mixedset {
   static final boolean DEBUG = true;
   static ArrayList<Integer[]> list;
+  static HashSet<Integer[]> hash;
   static int N, S, K;
 
   public static void main(String[] args) {
     Scanner stdin = new Scanner(System.in);
     list = new ArrayList<Integer[]>();
+    hash = new HashSet<Integer[]>();
     int nCases = stdin.nextInt();
 
     // For each case...
@@ -16,22 +18,15 @@ public class mixedset {
       S = stdin.nextInt();
       K = stdin.nextInt();
       if (DEBUG) System.out.printf("Case #%d: %d, %d, %d\n", i, N, S, K);
-      // printcombos(new int[S], 0);
-      // System.out.println(list.get(K-1));
-      // foo(new int[S], new boolean[N + 1], new boolean[N + 1], 0);
-
-      // boolean[] used = new boolean[N + 1];
-      // used[0] = true;
-      // bar(new int[S], used, 0);
-      printOdometer(new int[S], 0);
+      printOdometer(new Integer[S], 0);
     }
   }
 
-
   // Prints all possible seetings of odometer with n digits with the first k fixed.
-  public static void printOdometer(int[] odometer, int k) {
+  public static void printOdometer(Integer[] odometer, int k) {
       // Base case.
       if (k == odometer.length) {
+        // if (DEBUG) System.out.println(Arrays.toString(odometer));
         validate(odometer);
         return;
       }
@@ -46,8 +41,11 @@ public class mixedset {
       }
   }
 
-  public static void validate(int[] perm) {
-    boolean[] used = new boolean[K + 1];
+  public static void validate(Integer[] perm) {
+    boolean[] used = new boolean[N];
+    // if (DEBUG) System.out.printf("S/P: %d ::%s\n", K + 1, Arrays.toString(perm));
+    // if (DEBUG) System.out.printf("Dg: %s\n", Arrays.toString(used));
+
     for (int i = 0; i < perm.length - 1; i++) {
       for (int j = i + 1; j < perm.length; j++) {
         // Base case: cannot start with zero
@@ -62,7 +60,11 @@ public class mixedset {
           used[diff] = true;
       }
     }
-    System.out.println("Passed: " + Arrays.toString(perm));
-    // list.add(perm);
+    Arrays.sort(perm);
+    if (!hash.contains(perm)) {
+      hash.add(perm);
+      list.add(perm);
+      System.out.println("Passed: " + Arrays.toString(perm));
+    }
   }
 }
