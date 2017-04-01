@@ -1,10 +1,10 @@
 import java.util.*;
 
 public class mixedset {
-  static final boolean DEBUG = false;
-  static ArrayList<String> list;
-  static HashSet<String> hash;
-  static int N, S, K;
+  public static final boolean DEBUG = false;
+  public static ArrayList<String> list;
+  public static HashSet<String> hash;
+  public static int N, S, K;
 
   public static void main(String[] args) {
     Scanner stdin = new Scanner(System.in);
@@ -17,72 +17,88 @@ public class mixedset {
       N = stdin.nextInt();
       S = stdin.nextInt();
       K = stdin.nextInt();
-      if (DEBUG) System.out.printf("Case #%d: %d, %d, %d\n", i, N, S, K);
-      printOdometer(new Integer[S], 0);
-      for (String s : list) {
-        if (DEBUG) System.out.println(s);
-      }
+      combo(new Integer[S], 0, new boolean[N]);
+      if (DEBUG) System.out.println(list.toString());
       System.out.println(list.get(K - 1));
     }
   }
 
-  // Prints all possible seetings of odometer with n digits with the first k fixed.
-  public static void printOdometer(Integer[] odometer, int k) {
-      if (K == list.size() - 1) return;
-
-      // Base case.
-      if (k == odometer.length) {
-        validate(odometer);
+  // Prints all possible seetings of a with n digits with the first k fixed.
+  public static void combo(Integer[] a, int k, boolean[] used) {
+    // Already found rank
+    if (K == list.size() - 1) return;
+    // Reached list length
+    if (S == k) {
+      if (DEBUG) System.out.printf("combo(%s, %d)\n", Arrays.toString(a), k);
+      // NOTE(timp): arrays pass by reference, not value, derp-a-derp, forgot that
+      Integer[] tmp = a.clone();
+      // Sort
+      Arrays.sort(tmp);
+      // Validate
+      if (valid(tmp)) {
+        // Stringify
+        String key = Arrays.toString(tmp).replace("[", "").replace("]", "").replace(",", "");
+        // Hash
+        if (!hash.contains(key)) {
+          // Add to hash set
+          hash.add(key);
+          // Add to list
+          list.add(key);
+          if (DEBUG) System.out.println(":: " + key);
+        }
+        // Bail out!
         return;
       }
-
-      // Fill in each possible digit in slot k and recurse.
-      else {
-          int i;
-          for (i=0; i < N; i++) {
-              odometer[k] = i + 1;
-              printOdometer(odometer, k+1);
-          }
+    // Otherwise, keep trying to build the combo
+    } else {
+      for (int i = 0; i < N; i++) {
+        a[k] = i + 1;
+        // Check differences up to this point
+        if (!distinctDifferences(a, k)) return;
+        combo(a, k + 1, used);
+        // Already found rank
+        if (K == list.size() - 1) break;
       }
+    }
   }
 
-  public static void validate(Integer[] perm) {
+  public static boolean valid(Integer[] perm) {
     boolean[] used = new boolean[N];
-    String tmp = Arrays.toString(perm);
-    tmp = tmp.replace("[", "");
-    tmp = tmp.replace("]", "");
-    tmp = tmp.replace(",", "");
-    if (DEBUG) System.out.println("(*)"+tmp);
-    String[] characters = tmp.split(" ");
-    Arrays.sort(characters);
-    if (DEBUG) System.out.println("String form: " + Arrays.toString(characters));
-    StringBuilder builder = new StringBuilder();
-    for(String c : characters) {
-      builder.append(c + " ");
-    }
-    if (DEBUG) System.out.println("Whole string: " + builder);
-
-    for (int i = 0; i < perm.length; i++) {
+      for (int i = 0; i < perm.length; i++) {
       for (int j = i + 1; j < perm.length; j++) {
         // Base case: cannot start with zero
-        if (perm[i] == 0 || perm[j] == 0) return;
+        if (perm[i] == 0 || perm[j] == 0) return false;
         // Base case: values much be unique
-        if (perm[i] == perm[j]) return;
+        if (perm[i] == perm[j]) return false;
         // Check that differences do not overlap
         int diff = Math.abs(perm[i] - perm[j]);
         if (used[diff])
-          return;
+          return false;
         else
           used[diff] = true;
       }
     }
+    return true;
+  }
 
-    if (DEBUG) System.out.println("valid");
-
-
-    if (!hash.contains(builder.toString())) {
-      hash.add(builder.toString());
-      list.add(builder.toString());
+  public static boolean distinctDifferences(Integer[] a, int k) {
+    int newValue = a[k];
+    // Differences list
+    boolean[] differences = new boolean[N];
+    for (int i = 0; i < k; i++) {
+      // Also, check to see if the new value is greater than the previous ones
+      int d = a[i] - newValue;
+      if (d <= 0) {
+        if (DEBUG) System.out.printf("%d (%d) is not big enough\n", newValue, d);
+        return false;
+      }
+      if (differences[d]) {
+        if (DEBUG) System.out.printf("%d already was used\n", d);
+        return false;
+      } else {
+        differences[d] = true;
+      }
     }
+    return true;
   }
 }
