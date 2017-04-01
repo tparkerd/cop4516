@@ -2,14 +2,14 @@ import java.util.*;
 
 public class mixedset {
   static final boolean DEBUG = true;
-  static ArrayList<Integer[]> list;
-  static HashSet<Integer[]> hash;
+  static ArrayList<String> list;
+  static HashSet<String> hash;
   static int N, S, K;
 
   public static void main(String[] args) {
     Scanner stdin = new Scanner(System.in);
-    list = new ArrayList<Integer[]>();
-    hash = new HashSet<Integer[]>();
+    list = new ArrayList<String>();
+    hash = new HashSet<String>();
     int nCases = stdin.nextInt();
 
     // For each case...
@@ -19,6 +19,9 @@ public class mixedset {
       K = stdin.nextInt();
       if (DEBUG) System.out.printf("Case #%d: %d, %d, %d\n", i, N, S, K);
       printOdometer(new Integer[S], 0);
+      for (String s : list) {
+        System.out.println(s);
+      }
     }
   }
 
@@ -26,7 +29,6 @@ public class mixedset {
   public static void printOdometer(Integer[] odometer, int k) {
       // Base case.
       if (k == odometer.length) {
-        // if (DEBUG) System.out.println(Arrays.toString(odometer));
         validate(odometer);
         return;
       }
@@ -34,8 +36,8 @@ public class mixedset {
       // Fill in each possible digit in slot k and recurse.
       else {
           int i;
-          for (i=0; i <= N; i++) {
-              odometer[k] = i;
+          for (i=0; i < N; i++) {
+              odometer[k] = i + 1;
               printOdometer(odometer, k+1);
           }
       }
@@ -43,10 +45,21 @@ public class mixedset {
 
   public static void validate(Integer[] perm) {
     boolean[] used = new boolean[N];
-    // if (DEBUG) System.out.printf("S/P: %d ::%s\n", K + 1, Arrays.toString(perm));
-    // if (DEBUG) System.out.printf("Dg: %s\n", Arrays.toString(used));
+    String tmp = Arrays.toString(perm);
+    tmp = tmp.replace("[", "");
+    tmp = tmp.replace("]", "");
+    tmp = tmp.replace(",", "");
+    if (DEBUG) System.out.println("(*)"+tmp);
+    String[] characters = tmp.split(" ");
+    Arrays.sort(characters);
+    if (DEBUG) System.out.println("String form: " + Arrays.toString(characters));
+    StringBuilder builder = new StringBuilder();
+    for(String c : characters) {
+      builder.append(c + " ");
+    }
+    if (DEBUG) System.out.println("Whole string: " + builder);
 
-    for (int i = 0; id < perm.length - 1; i++) {
+    for (int i = 0; i < perm.length; i++) {
       for (int j = i + 1; j < perm.length; j++) {
         // Base case: cannot start with zero
         if (perm[i] == 0 || perm[j] == 0) return;
@@ -60,11 +73,13 @@ public class mixedset {
           used[diff] = true;
       }
     }
-    Arrays.sort(perm);
-    if (!hash.contains(perm)) {
-      hash.add(perm);
-      list.add(perm);
-      System.out.println("Passed: " + Arrays.toString(perm));
+
+    if (DEBUG) System.out.println("valid");
+
+
+    if (!hash.contains(builder.toString())) {
+      hash.add(builder.toString());
+      list.add(builder.toString());
     }
   }
 }
