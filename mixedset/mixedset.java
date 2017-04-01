@@ -46,7 +46,7 @@ public class mixedset {
     // if (DEBUG) System.out.printf("S/P: %d ::%s\n", K + 1, Arrays.toString(perm));
     // if (DEBUG) System.out.printf("Dg: %s\n", Arrays.toString(used));
 
-    for (int i = 0; i < perm.length - 1; i++) {
+    for (int i = 0; id < perm.length - 1; i++) {
       for (int j = i + 1; j < perm.length; j++) {
         // Base case: cannot start with zero
         if (perm[i] == 0 || perm[j] == 0) return;
