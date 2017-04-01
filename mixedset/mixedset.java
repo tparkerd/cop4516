@@ -1,32 +1,35 @@
 import java.util.*;
 
 public class mixedset {
-  static final boolean DEBUG = true;
+  static final boolean DEBUG = false;
   static ArrayList<String> list;
   static HashSet<String> hash;
   static int N, S, K;
 
   public static void main(String[] args) {
     Scanner stdin = new Scanner(System.in);
-    list = new ArrayList<String>();
-    hash = new HashSet<String>();
     int nCases = stdin.nextInt();
 
     // For each case...
     for (int i = 1; i <= nCases; i++) {
+      list = new ArrayList<String>();
+      hash = new HashSet<String>();
       N = stdin.nextInt();
       S = stdin.nextInt();
       K = stdin.nextInt();
       if (DEBUG) System.out.printf("Case #%d: %d, %d, %d\n", i, N, S, K);
       printOdometer(new Integer[S], 0);
       for (String s : list) {
-        System.out.println(s);
+        if (DEBUG) System.out.println(s);
       }
+      System.out.println(list.get(K - 1));
     }
   }
 
   // Prints all possible seetings of odometer with n digits with the first k fixed.
   public static void printOdometer(Integer[] odometer, int k) {
+      if (K == list.size() - 1) return;
+
       // Base case.
       if (k == odometer.length) {
         validate(odometer);
