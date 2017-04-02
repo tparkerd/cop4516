@@ -18,7 +18,7 @@ public class sets {
       N = stdin.nextInt();
       S = stdin.nextInt();
       K = stdin.nextInt();
-      boolean[] differences = new boolean[N];
+      boolean[] differences = new boolean[N + 1];
       differences[0] = true;
       perm(new TreeSet<Integer>(), differences);
     }
@@ -30,7 +30,7 @@ public class sets {
     // System.out.printf("Call: %s (%d)\n", set.toString(), set.size());
     if (set.size() >= S) {
       if (h.contains(set)) return;
-      System.out.println(set);
+      System.out.println("::::"+set);
       l.add(set);
       h.add(set);
       return;
@@ -40,14 +40,20 @@ public class sets {
         // add must be larger than the largest in the set. Also, NO DUPS!
         if (set.size() >= 1 && (int)set.last() >= i) continue;
 
+        // System.out.printf("%s adding %d\n", set.toString(), i);
+        set.add(i);
+
+
+        boolean[] tmpUsed = used.clone();
         // TODO(timp): Check that no two pairings share a difference
         // if not valid, return to back out of this branch
-        checkDifferences(set, used, i);
+        if (!checkDifferences(set, tmpUsed, i)) {
+          set.remove(i);
+          continue;
+        }
 
-
-        set.add(i);
         // Valid candidate set found
-        perm(set, used);
+        perm(set, tmpUsed.clone());
         set.remove(i);
       }
     }
@@ -55,26 +61,26 @@ public class sets {
 
   @SuppressWarnings("unchecked")
   public static boolean checkDifferences(SortedSet set, boolean[] used, int newValue) {
-    if (set.size() <= 1) return true;
-    // System.out.printf("checkDifferences(%s)\n\n", set.toString());
+    // Single item, always just a difference of zero, so it's good, go back
+    // if (set.size() <= 1) return true;
 
-    // Clone the used array to know what has been previoulsy used
-    boolean[] tmp = used.clone();
-    // System.out.println("Tmp" + Arrays.toString(tmp));
-    // System.out.println(newValue);
-    ArrayList<Integer> setValues = new ArrayList<Integer>(set);
-    // System.out.println("SetValues: " + setValues.toString());
-    // For each of the items, see if they have been used
-    for (int i = 0; i < set.size(); i++) {
-      // System.out.printf("Calc diff: |%d - %d| = %d\n", newValue, setValues.get(i), Math.abs(newValue - setValues.get(i)));
-      int diff = Math.abs(newValue - setValues.get(i));
-      if (tmp[diff]) {
-        System.out.println("Failed: " + diff);
+    // Get all the values
+    ArrayList<Integer> values = new ArrayList(set);
+
+    // System.out.printf("Used: %s\n", Arrays.toString(used));
+
+    // From first (0th) to last (set.size() - 1) -- b/c I already added the item
+    for (int i = 0; i < set.size() - 1 ; i++) {
+      // See the difference between each item and the new one
+      // System.out.printf("|%d - %d| = %d\n", values.get(i), newValue, Math.abs(values.get(i) - newValue));
+      int diff = Math.abs(values.get(i) - newValue);
+      if (used[diff]) {
+        // System.out.println("FAIL");
         return false;
       }
-      tmp[diff] = true;
+      used[diff] = true;
     }
-    used = tmp;
+    // System.out.println("PASS");
     return true;
   }
 }

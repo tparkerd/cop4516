@@ -1,99 +1,89 @@
 import java.util.*;
 
 public class mixedset {
-  public static ArrayList<String> list;
-  public static HashSet<String> hash;
+  public static final boolean DEBUG = false;
+  public static HashSet<SortedSet> h;
+  public static List<String> l;
   public static int N, S, K;
 
+  @SuppressWarnings("unchecked")
   public static void main(String[] args) {
+
     Scanner stdin = new Scanner(System.in);
     int nCases = stdin.nextInt();
 
     // For each case...
     for (int i = 1; i <= nCases; i++) {
-      System.out.println("Case: " + i);
-      list = new ArrayList<String>();
-      hash = new HashSet<String>();
+      h = new HashSet<SortedSet>();
+      l = new ArrayList<String>();
       N = stdin.nextInt();
       S = stdin.nextInt();
       K = stdin.nextInt();
-      combo(new int[S], 0, new boolean[N]);
-      System.out.println(list);
-      // System.out.println()
-      // System.out.println("Solution: %s", )
-      // System.out.println(list.get(K - 1));
+      boolean[] differences = new boolean[N + 1];
+      differences[0] = true;
+      perm(new TreeSet<Integer>(), differences);
+      for (String s : l) {
+        System.out.println(s);
+      }
+      // if (DEBUG) System.out.println(l.get(K - 1));
+
     }
   }
 
-  // Prints all possible seetings of a with n digits with the first k fixed.
-  public static void combo(int[] a, int k, boolean[] used) {
-    // Already found rank
-    if (K == list.size() - 1) return;
-    // Reached list length
-    if (S == k) {
-      // NOTE(timp): arrays pass by reference, not value, derp-a-derp, forgot that
-      int[] tmp = a.clone();
-      // Sort
-      Arrays.sort(tmp);
-      // Validate
-      if (valid(tmp)) {
-        // Stringify
-        String key = Arrays.toString(tmp).replace("[", "").replace("]", "").replace(",", "");
-        // Hash
-        if (!hash.contains(key)) {
-          // Add to hash set
-          hash.add(key);
-          // Add to list
-          list.add(key);
-        }
-        // Bail out!
-        return;
-      }
-    // Otherwise, keep trying to build the combo
+  @SuppressWarnings("unchecked")
+  public static void perm(SortedSet set, boolean[] used) {
+    if (l.size() == K) return;
+    if (set.size() >= S) {
+      if (h.contains(set)) return;
+      // if (DEBUG) System.out.println("::::"+set);
+      l.add(set.toString().replace("[", "").replace("]", "").replace(",", ""));
+      h.add(set);
+      return;
     } else {
-      for (int i = 0; i < N; i++) {
-        a[k] = i + 1;
-        // Check differences up to this point
-        if (!distinctDifferences(a, k)) return;
-        combo(a, k + 1, used);
+      for (int i = 1; i <= N; i++) {
+        // When there is more than one item in the set, the item we want to
+        // add must be larger than the largest in the set. Also, NO DUPS!
+        if (set.size() >= 1 && i <= (int)set.last()) continue;
+        else {
+          // Try adding the next item
+          if (DEBUG) System.out.println("Adding: " + i);
+          set.add(i);
+
+          boolean[] tmpUsed = used.clone();
+          // TODO(timp): Check that no two pairings share a difference
+          // if not valid, return to back out of this branch
+          if (!checkDifferences(set, tmpUsed, i)) {
+            set.remove(i);
+            continue;
+          }
+          // Valid candidate set found
+          perm(set, tmpUsed.clone());
+          set.remove(i);
+        }
       }
     }
   }
 
-  public static boolean valid(int[] perm) {
-    boolean[] used = new boolean[N];
-      for (int i = 0; i < perm.length; i++) {
-      for (int j = i + 1; j < perm.length; j++) {
-        // Base case: cannot start with zero
-        // if (perm[i] == 0 || perm[j] == 0) return false;
-        // Base case: values much be unique
-        if (perm[i] == perm[j]) return false;
-        // Check that differences do not overlap
-        int diff = Math.abs(perm[i] - perm[j]);
-        if (used[diff])
-          return false;
-        else
-          used[diff] = true;
-      }
-    }
-    return true;
-  }
+  @SuppressWarnings("unchecked")
+  public static boolean checkDifferences(SortedSet set, boolean[] used, int newValue) {
+    if (DEBUG) System.out.println("Call:" + set.toString());
+    if (DEBUG) System.out.println("Used: " + Arrays.toString(used));
+    // Single item, always just a difference of zero, so it's good, go back
+    if (set.size() < 2) return true;
 
-  public static boolean distinctDifferences(int[] a, int k) {
-    int newValue = a[k];
-    // Differences list
-    boolean[] differences = new boolean[N];
-    for (int i = 0; i < k; i++) {
-      // Also, check to see if the new value is greater than the previous ones
-      int d = a[i] - newValue;
-      if (d <= 0) {
+    // Get all the values
+    ArrayList<Integer> values = new ArrayList(set);
+
+    // From first (0th) to last (set.size() - 1) -- b/c I already added the item
+    for (int i = 0; i < set.size() - 1; i++) {
+      // See the difference between each item and the new one
+      int diff = Math.abs(values.get(i) - newValue);
+      if (DEBUG) System.out.printf("|%d - %d| = %d\n", values.get(i), newValue, diff);
+      if (used[diff]) {
+        if (DEBUG) System.out.println("FAIL");
         return false;
       }
-      if (differences[d]) {
-        return false;
-      } else {
-        differences[d] = true;
-      }
+      used[diff] = true;
     }
     return true;
   }
