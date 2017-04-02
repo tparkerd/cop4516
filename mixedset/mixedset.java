@@ -18,7 +18,6 @@ public class mixedset {
       Arrays.fill(differenceFrequencies, 0);
       solve(new TreeSet<Integer>(), differenceFrequencies);
     }
-
   }
 
   @SuppressWarnings("unchecked")
