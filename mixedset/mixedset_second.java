@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class mixedset {
+public class mixedset_second {
   public static ArrayList<String> list;
   public static HashSet<String> hash;
   public static int N, S, K;
@@ -65,7 +65,7 @@ public class mixedset {
       for (int i = 0; i < perm.length; i++) {
       for (int j = i + 1; j < perm.length; j++) {
         // Base case: cannot start with zero
-        // if (perm[i] == 0 || perm[j] == 0) return false;
+        if (perm[i] == 0 || perm[j] == 0) return false;
         // Base case: values much be unique
         if (perm[i] == perm[j]) return false;
         // Check that differences do not overlap
