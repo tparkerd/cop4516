@@ -71,13 +71,13 @@ public class mixedset {
       int diff = last - s.get(i);
       // Increment the number of said difference found
       copy[diff]++;
-      // If we founda a repeat difference, bail out
+      // If we found a repeat difference, bail out
       if (copy[diff] > 1) {
         return false;
       }
     }
 
-    // Otherwise, it was never proven invalid, so actually updates the real
+    // Otherwise, it was never proven invalid, so actually update the real
     // list of difference frequencies
     for (int i = 0; i < s.size() - 1; i++) {
       int diff = last - s.get(i);
