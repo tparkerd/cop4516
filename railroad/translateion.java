@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class railroad {
+public class translateion {
   public static Boolean[][] memo;
   public static int[] trainA;
   public static int[] trainB;
@@ -17,8 +17,8 @@ public class railroad {
 
     // For each case...
     while (trainALength != 0 && trainBLength != 0) {
-      trainA = new int[trainALength];
-      trainB = new int[trainBLength];
+      trainA = new int[1010];
+      trainB = new int[1010];
 
       for (int i = 0; i < trainALength; i++)
         trainA[i] = stdin.nextInt();
@@ -35,7 +35,7 @@ public class railroad {
 
       if (DEBUG) System.out.println("O: " + Arrays.toString(order));
 
-      memo = new Boolean[trainALength + 1][trainBLength + 1];
+      memo = new Boolean[1010][1010];
       for (int i = 0; i < memo.length; i++)
         Arrays.fill(memo[i], null);
       memo[0][0] = true;
