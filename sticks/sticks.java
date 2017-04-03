@@ -98,10 +98,8 @@ public class sticks {
 
 					// This is the additional cost for the fusing. We are obtaining
 					// the minimum dimension of each of the two lots.
-					value += FUSE_FEE_CONSTANT*min(minMult[o][s].cost, minMult[o][s].depth)*
-					                           min(minMult[s+1][o+c].cost, minMult[s+1][o+c].depth);
 
-					// These are the length and depth of the fused lot.
+// These are the length and depth of the fused lot.
 					int my_length = minMult[o][s].cost+minMult[s+1][o+c].cost;
 					int my_depth = 1;
 
