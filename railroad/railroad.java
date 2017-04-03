@@ -1,7 +1,7 @@
 import java.util.*;
 
 public class railroad {
-  public static Boolean[][] memo;
+  public static int[][] memo;
   public static int[] trainA;
   public static int[] trainB;
   public static int trainALength;
@@ -9,7 +9,6 @@ public class railroad {
   public static int[] order;
 
 
-  public static final boolean DEBUG = false;
   public static void main(String[] args) {
     Scanner stdin = new Scanner(System.in);
     trainALength = stdin.nextInt();
@@ -17,8 +16,8 @@ public class railroad {
 
     // For each case...
     while (trainALength != 0 && trainBLength != 0) {
-      trainA = new int[trainALength];
-      trainB = new int[trainBLength];
+      trainA = new int[trainALength + 1];
+      trainB = new int[trainBLength + 1];
 
       for (int i = 0; i < trainALength; i++)
         trainA[i] = stdin.nextInt();
@@ -26,29 +25,15 @@ public class railroad {
       for (int i = 0; i < trainBLength; i++)
         trainB[i] = stdin.nextInt();
 
-      if (DEBUG) System.out.println("A: " + Arrays.toString(trainA));
-      if (DEBUG) System.out.println("B: " + Arrays.toString(trainB));
-
-      order = new int[trainALength + trainBLength + 1];
-      for (int i = 0; i < trainALength + trainBLength; i++)
+      order = new int[trainALength + trainBLength];
+      for (int i = 0; i < order.length; i++)
         order[i] = stdin.nextInt();
 
-      if (DEBUG) System.out.println("O: " + Arrays.toString(order));
-
-      memo = new Boolean[trainALength + 1][trainBLength + 1];
-      for (int i = 0; i < memo.length; i++)
-        Arrays.fill(memo[i], null);
-      memo[0][0] = true;
-
-      if (solve(trainALength, trainBLength))
+      if (solve(0, 0))
         System.out.println("possible");
       else
         System.out.println("not possible");
-      //
-      // for (Boolean[] b : memo) {
-      //   System.out.println(Arrays.toString(b));
-      // }
-
+        
       trainALength = stdin.nextInt();
       trainBLength = stdin.nextInt();
     }
@@ -56,24 +41,15 @@ public class railroad {
   }
 
   public static boolean solve(int a, int b) {
-    if (a < 0 || b < 0) {
-      return false;
-    }
-    System.out.printf("Call: %d, %d\n", a, b);
+    if ((a + b) == order.length) return true;
+    boolean left = false;
+    boolean right = false;
 
-    // If already solved...
-    if (memo[a][b] != null)
-      return memo[a][b];
+    if (a < trainALength && trainA[a] == order[a + b])
+      left = solve(a + 1, b);
+    if (b < trainBLength && trainB[b] == order[a + b])
+      right = solve(a, b + 1);
 
-    // Assume not possible
-    memo[a][b] = false;
-
-    if (trainA[a] == order[a + b] && !memo[a][b])
-      memo[a][b] = solve(a - 1, b);
-
-    if (trainB[b] == order[a + b] && !memo[a][b])
-      memo[a][b] = solve(a, b - 1);
-
-    return memo[a][b];
+    return left | right;
   }
 }
