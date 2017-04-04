@@ -1,160 +1,76 @@
-// Arup Guha
-// 8/23/07 - Solution to 2007 UCF Local Contest Problem Wall Street
-
-// This problem is basically a different version of the Matrix Chain
-// Multiplication problem with a different evaluation function...
-
 import java.util.*;
-import java.io.*;
-
-// Stores the dimensions of a lot.
-class Dimensions {
-
-	public int length;
-	public int cost;
-
-	public Dimensions(int l, int c) {
-		length = l;
-		cost = c;
-	}
-
-  @Override
-  public String toString() {
-    return "("+length+", "+cost+")";
-  }
-
-}
 
 public class sticks {
+	public static final boolean DEBUG = true;
+	public static int[] segments;
 
-	final public static int FUSE_FEE_CONSTANT = 0;
+	public static void main(String[] args) {
+		Scanner stdin = new Scanner(System.in);
+		int nCases = stdin.nextInt();
 
-	// A wall street object will store the dimensions of each lot on the street.
-	private Dimensions[] dim;
+		// For each case...
+		for (int c = 0; c < nCases; c++) {
+			// Get original stick length
+			int stickLength = stdin.nextInt();
 
-	// Initialize a wall street object with a Scanner to a file that has
-	// information about each lot on the street.
-	public sticks(Scanner fin) {
+			// Number of cuts
+			int nCuts = stdin.nextInt();
 
-		// Get the number of buildings.
-    int lengthOfStick = fin.nextInt();
-		int numbuildings = fin.nextInt();
-		dim = new Dimensions[numbuildings + 1];
+			// Gather cut locations, + start and end
+			// NOTE(timp): I kept the start and end so I could use them to
+			// determine the length of the first and last segment of the stick
+			int[] cuts = new int[nCuts + 2];
+			for (int i = 1; i <= nCuts; i++) cuts[i] = stdin.nextInt();
+			cuts[nCuts + 1] = stickLength; // end of last segment
+			if (DEBUG) System.out.println("Cuts: " + Arrays.toString(cuts));
 
-    int last = 0;
-		// Read in each building's dimensions.
-		for (int i=0; i< numbuildings; i++) {
-			int len = fin.nextInt();
-			int wid = 1;
-			dim[i] = new Dimensions(len - last, len - last);
-      last = len;
+			// Split up the stick into the known segment lengths
+			segments = new int[nCuts + 1];
+			for (int i = 1; i <= nCuts + 1; i++) segments[i - 1] = cuts[i] - cuts[i - 1];
+			if (DEBUG) System.out.println("Segments: " + Arrays.toString(segments));
+
+			// Solve and print!
+			System.out.println("----------------\nCase #" + (c + 1) + ": " + solve() + "\n----------------");
 		}
-    dim[dim.length - 1] = new Dimensions(lengthOfStick - last, lengthOfStick - last);
-
-    System.out.println(Arrays.toString(dim));
 	}
 
-	// Run the matrix chain multiplication algorithm adapted for this problem.
-	public int runMCM() {
+	public static int solve() {
+		// Stores the intermediate answers
+		int[][] minMult = new int[segments.length][segments.length];
 
-		// Will store out intermediate answers to the question:
-		// What is the minimum cost for fusing some contiguous subsequence of
-		// lots? It will also store the dimensions of the new lot.
-		Dimensions[][] minMult = new Dimensions[dim.length][dim.length];
+		// Initialize the matrix to show that it takes no cost for the
+		// individual stick segments themselves, without re-joining them
+		for (int i = 0; i < minMult.length; i++) minMult[i][i] = segments[i];
 
-
-		// Initialize our matrix to show that it takes no cost for the
-		// individual lots themselves without fusing anything.
-		for (int i=0; i<minMult.length; i++)
-			minMult[i][i] = dim[i];
-
-
-		// c+1 stands for the number of lots that are put together. In the first
-		// loop, we are just calculating the cost of putting two lots together.
+		// c + 1 is the number of lots we are joining together. In the first loop,
+		// we just calculate the cost of putting two lots together
 		for (int c = 1; c < minMult.length; c++) {
+			for (int o = 0; o < minMult.length - c; o++) {
+				// The boundary at which we are fusing the two segments
+				for (int s = o; s < o + c; s++) {
+					// Calculations are made!
+					// This is the cost of the two segments re-joined
+					// NOTE(timp): This is the part I'm most unsure about.
+					// Do I need to save the minimum of each of the attempts to
+					// join the segments at this point and use that as the cost for each?
+					// Recursion might be easier to read for this part
+					if (DEBUG) System.out.printf("Join Cost: %d [%d][%d] + %d [%d][%d] = %d [%d][%d]\n",
+																			 minMult[o][s], o, s,															// Left stick?
+																			 minMult[s + 1][o + c], s + 1, o + c,							// Right stick?
+																			 minMult[o][s] + minMult[s + 1][o + c], o, o + c  // ??? Is this going in the right place?
+					 													 	);
+					int cost = minMult[o][s] + minMult[s + 1][o + c];
 
-			for (int o = 0; o < minMult.length-c; o++) {
-
-				// This will eventually store the minimum cost for putting
-				// together lots o through o+c, assuming that we number the lots
-				// 0 through dim.length-1. The -1 is a flag/sentinel value to
-				// indicate that we don't have a minimum calculated yet.
-				Dimensions min = null;
-
-				// s stands for the boundary at which we are fusing the two
-				// lots.
-				for (int s=o; s<o+c; s++) {
-
-					// Make the calculation for creating the lot by fusing
-					// at location s. Here are the three components of the cost:
-					// 1) Cost of first part of the lot.
-					// 2) Cost of the second part of the lot.
-					// 3) Cost of fusing those two lots.
-
-					// This is the cost of the two lots being fused.
-					int value = minMult[o][s].cost + minMult[s+1][o+c].cost;
-
-					// This is the additional cost for the fusing. We are obtaining
-					// the minimum dimension of each of the two lots.
-					value += FUSE_FEE_CONSTANT*min(minMult[o][s].cost, minMult[o][s].depth)*
-					                           min(minMult[s+1][o+c].cost, minMult[s+1][o+c].depth);
-
-					// These are the length and depth of the fused lot.
-					int my_length = minMult[o][s].cost+minMult[s+1][o+c].cost;
-					int my_depth = 1;
-
-					// No case has been determined, so this is the best seen so far.
-					if (min == null)
-						min = new Dimensions(my_length, my_depth, my_length);
-
-					// This case is better than any previous, so update it!
-					else if (my_length < min.cost)
-						min = new Dimensions(my_length, my_depth, my_length);
+					// Store this value for future reference
+					minMult[o][o + c] = cost;
 				}
-
-				// Here we want to store the new LOT, with its dimensions and
-				// minimum cost.
-				minMult[o][o+c] = min;
-
 			}
 		}
 
-		// This is the answer to our question!
-		return minMult[0][minMult.length-1].cost;
+		// Show matrix!
+		for (int i = 0; i < minMult.length; i++)
+			if (DEBUG) System.out.println(Arrays.toString(minMult[i]));
+		// Found the answer!
+		return minMult[0][minMult.length - 1];
 	}
-
-	// Returns the minimum of a and b.
-	public static int min(int a, int b) {
-		if (a < b)
-			return a;
-		return b;
-	}
-
-	// Returns the maximum of a and b.
-	public static int max(int a, int b) {
-		if (a > b)
-			return a;
-		return b;
-	}
-
-
-	public static void main(String[] args) throws Exception {
-
-		// Set up reading from the input file.
-    Scanner stdin = new Scanner(System.in);
-		// Get the number of cases.
-		int numcases = stdin.nextInt();
-
-		// Process each case and print out the corresponding output!
-		for (int my_case=1; my_case<=numcases; my_case++) {
-
-			sticks myBuildings = new sticks(stdin);
-			int my_cost = myBuildings.runMCM();
-			System.out.println(my_cost);
-		}
-
-		// Close the input file.
-		stdin.close();
-	}
-
 }
