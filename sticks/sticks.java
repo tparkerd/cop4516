@@ -11,18 +11,16 @@ import java.io.*;
 class Dimensions {
 
 	public int length;
-	public int depth;
 	public int cost;
 
-	public Dimensions(int l, int d, int c) {
+	public Dimensions(int l, int c) {
 		length = l;
-		depth = d;
 		cost = c;
 	}
 
   @Override
   public String toString() {
-    return "("+length+", "+depth+", "+cost+")";
+    return "("+length+", "+cost+")";
   }
 
 }
@@ -48,10 +46,10 @@ public class sticks {
 		for (int i=0; i< numbuildings; i++) {
 			int len = fin.nextInt();
 			int wid = 1;
-			dim[i] = new Dimensions(len - last, wid, len - last);
+			dim[i] = new Dimensions(len - last, len - last);
       last = len;
 		}
-    dim[dim.length - 1] = new Dimensions(lengthOfStick - last, 1, lengthOfStick - last);
+    dim[dim.length - 1] = new Dimensions(lengthOfStick - last, lengthOfStick - last);
 
     System.out.println(Arrays.toString(dim));
 	}
@@ -98,8 +96,10 @@ public class sticks {
 
 					// This is the additional cost for the fusing. We are obtaining
 					// the minimum dimension of each of the two lots.
+					value += FUSE_FEE_CONSTANT*min(minMult[o][s].cost, minMult[o][s].depth)*
+					                           min(minMult[s+1][o+c].cost, minMult[s+1][o+c].depth);
 
-// These are the length and depth of the fused lot.
+					// These are the length and depth of the fused lot.
 					int my_length = minMult[o][s].cost+minMult[s+1][o+c].cost;
 					int my_depth = 1;
 
