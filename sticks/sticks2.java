@@ -2,9 +2,9 @@ import java.util.*;
 
 public class sticks2 {
   public static final boolean DEBUG = true;
-  public static int[] segments;
+  public static int[][] segments;
   public static int[][] memo;
-  public static int[][] subDim;
+  public static int[][][] subDim;
   public static void main(String[] args) {
     Scanner stdin = new Scanner(System.in);
     int nCases = stdin.nextInt();
@@ -26,28 +26,44 @@ public class sticks2 {
       if (DEBUG) System.out.println("Cuts: " + Arrays.toString(cuts));
 
       // Split up the stick into the known segment lengths
-      segments = new int[nCuts + 1];
-      for (int i = 1; i <= nCuts + 1; i++) segments[i - 1] = cuts[i] - cuts[i - 1];
-      if (DEBUG) System.out.println("Segments: " + Arrays.toString(segments));
+      segments = new int[nCuts + 1][2];
+      for (int i = 1; i <= nCuts + 1; i++) {
+        segments[i - 1][1] = 1; // 'depth'
+        segments[i - 1][0] = cuts[i] - cuts[i - 1];
+      }
+
+      // if (DEBUG) System.out.println("Segments: " + Arrays.toString(segments));
+      for (int[] d : segments) {
+        if (DEBUG) System.out.println(Arrays.toString(d));
+      }
 
 
       // Set up memo table.
-			memo = new int[segments.length][segments.length];
-			Arrays.fill(memo, -1);
+      int n = segments.length;
+			memo = new int[n][n];
+			for (int i=0; i<n; i++) Arrays.fill(memo[i], -1);
+
+      for (int[] m : memo) {
+        if (DEBUG) System.out.println(Arrays.toString(m));
+      }
 
 			// Pre-calculate dimensions of every possible building fuse.
-			subDim = new int[segments.length][segments.length];
-			for (int i=0; i< segments.length; i++) {
-				subDim[i][i] = segments[i];
-				for (int j=i+1; j< segments.length; j++) {
-					subDim[i][j] = subDim[i][j-1] + segments[j];
+			subDim = new int[n][n][2];
+			for (int i=0; i<n; i++) {
+				subDim[i][i][0] = segments[i][0];
+				subDim[i][i][1] = segments[i][1];
+				for (int j=i+1; j<n; j++) {
+					subDim[i][j][0] = subDim[i][j-1][0] + segments[j][0];
+					subDim[i][j][1] = Math.max(subDim[i][j-1][1], segments[j][1]);
 				}
 			}
 
-      if (DEBUG) System.out.println("Memo: " + Arrays.toString(memo));
+      // if (DEBUG) System.out.println("Memo: " + Arrays.toString(memo));
 
-      for (int[] q : subDim) {
-        if (DEBUG) System.out.println(Arrays.toString(q));
+      for (int[][] q : subDim) {
+        for (int[] r : q) {
+          if (DEBUG) System.out.println(Arrays.toString(r));
+        }
       }
 
       // Solve and print!
@@ -56,33 +72,34 @@ public class sticks2 {
 
     }
   }
+  	// Returns best cost of fusing building[start..end]
+  	public static int solve(int start, int end) {
 
+  		// Standard base cases in a memo solution.
+  		if (start == end) return 0;
+  		if (memo[start][end] != -1) return memo[start][end];
 
-  public static int solve(int start, int end) {
+  		// Set this high enough.
+  		int res = 1000000000;
 
-		// Standard base cases in a memo solution.
-		if (start == end) return 0;
-		if (memo[start][end] != -1) return memo[start][end];
+  		// Try each split/fuse point.
+  		for (int split = start; split < end; split++) {
 
-		// Set this high enough.
-		int res = 1000000000;
+  			// Recursive costs on both ends.
+  			int leftCost = solve(start, split);
+  			int rightCost = solve(split+1, end);
 
-		// Try each split/fuse point.
-		for (int split = start; split<end; split++) {
+        if (DEBUG) System.out.printf("Left: %d / Right: %d\n", leftCost, rightCost);
 
-			// Recursive costs on both ends.
-			int leftCost = solve(start, split);
-			int rightCost = solve(split+1, end);
+  			// Get teh appropriate dimensions for oru const function.
+  			int minLeft = Math.min(subDim[start][split][0], subDim[start][split][1]);
+  			int minRight = Math.min(subDim[split+1][end][0], subDim[split+1][end][1]);
 
-			// Get the appropriate dimensions for our cost function.
-			int minLeft = Math.min(subDim[start][split], subDim[start][split]);
-			int minRight = Math.min(subDim[split+1][end], subDim[split+1][end]);
+  			// Calculate cost for this split and update our best seen, if necessary.
+  			res = Math.min(res, minLeft + minRight);
+  		}
 
-			// Calculate cost for this split and update our best seen, if necessary.
-			res = Math.min(res, leftCost+rightCost+minLeft*minRight);
-		}
-
-		// Store and return.
-		return memo[start][end] = res;
-	}
+  		// Store and return.
+  		return memo[start][end] = res;
+  	}
 }
