@@ -1,76 +1,71 @@
-import java.util.*;
+// By Jack W.
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Scanner;
 
 public class sticks {
-	public static final boolean DEBUG = true;
-	public static int[] segments;
+	public static void main(String[] args){
+		Scanner in = new Scanner(System.in);
 
-	public static void main(String[] args) {
-		Scanner stdin = new Scanner(System.in);
-		int nCases = stdin.nextInt();
+		int cases = in.nextInt();
 
-		// For each case...
-		for (int c = 0; c < nCases; c++) {
-			// Get original stick length
-			int stickLength = stdin.nextInt();
+		for(int j = 0; j < cases; j++){
+			int l = in.nextInt();
+			int cutCount = in.nextInt();
 
-			// Number of cuts
-			int nCuts = stdin.nextInt();
+			ArrayList<Integer> cuts = new ArrayList<Integer>();
+			for(int i = 0; i < cutCount; i++){
+				cuts.add(in.nextInt());
+			}
 
-			// Gather cut locations, + start and end
-			// NOTE(timp): I kept the start and end so I could use them to
-			// determine the length of the first and last segment of the stick
-			int[] cuts = new int[nCuts + 2];
-			for (int i = 1; i <= nCuts; i++) cuts[i] = stdin.nextInt();
-			cuts[nCuts + 1] = stickLength; // end of last segment
-			if (DEBUG) System.out.println("Cuts: " + Arrays.toString(cuts));
+			long[][] memo = new long[l + 1][l + 1];
+			for(int i = 0; i < memo.length; i++){
+				Arrays.fill(memo[i], -1);
+			}
 
-			// Split up the stick into the known segment lengths
-			segments = new int[nCuts + 1];
-			for (int i = 1; i <= nCuts + 1; i++) segments[i - 1] = cuts[i] - cuts[i - 1];
-			if (DEBUG) System.out.println("Segments: " + Arrays.toString(segments));
-
-			// Solve and print!
-			System.out.println("----------------\nCase #" + (c + 1) + ": " + solve() + "\n----------------");
+			System.out.println(solve(0, l, cuts, memo));
 		}
 	}
 
-	public static int solve() {
-		// Stores the intermediate answers
-		int[][] minMult = new int[segments.length][segments.length];
+	// We're basically solving for the minimum value for any given start&end point.
+	public static long solve(int start, int end, ArrayList<Integer> cuts, long[][] memo){
+		if(memo[start][end] != -1){
+			// we've already solved this segment before, so return that value
+			return memo[start][end];
+		}
 
-		// Initialize the matrix to show that it takes no cost for the
-		// individual stick segments themselves, without re-joining them
-		for (int i = 0; i < minMult.length; i++) minMult[i][i] = segments[i];
+		// cut will determine whether or not we've made a cut.
+		// I was running into a problem where `result` was being returned when there were no possible cuts that could be made.
+		// So this value is used at the end of this function to determine if we should return 0, or `result`.
+		boolean cut = false;
 
-		// c + 1 is the number of lots we are joining together. In the first loop,
-		// we just calculate the cost of putting two lots together
-		for (int c = 1; c < minMult.length; c++) {
-			for (int o = 0; o < minMult.length - c; o++) {
-				// The boundary at which we are fusing the two segments
-				for (int s = o; s < o + c; s++) {
-					// Calculations are made!
-					// This is the cost of the two segments re-joined
-					// NOTE(timp): This is the part I'm most unsure about.
-					// Do I need to save the minimum of each of the attempts to
-					// join the segments at this point and use that as the cost for each?
-					// Recursion might be easier to read for this part
-					if (DEBUG) System.out.printf("Join Cost: %d [%d][%d] + %d [%d][%d] = %d [%d][%d]\n",
-																			 minMult[o][s], o, s,															// Left stick?
-																			 minMult[s + 1][o + c], s + 1, o + c,							// Right stick?
-																			 minMult[o][s] + minMult[s + 1][o + c], o, o + c  // ??? Is this going in the right place?
-					 													 	);
-					int cost = minMult[o][s] + minMult[s + 1][o + c];
 
-					// Store this value for future reference
-					minMult[o][o + c] = cost;
-				}
+		// used to hold the minimum result of the recursive call
+		long result = Long.MAX_VALUE;
+
+
+		// This loop essentially finds all cuts that are between the start and end point.
+		// It finds the cut that results in the minimum value by just recursively calling `solve` for all possible cuts
+		for(int i = 0; i < cuts.size(); i++){
+			int curr = cuts.get(i);
+
+			if(curr > start && curr < end){
+				cut = true;
+
+				// If we select a cut, we need to check both of the resulting sticks
+				long temp = solve(start, curr, cuts, memo) + solve(curr, end, cuts, memo) + (end - start);
+
+				result = Math.min(temp, result);
 			}
 		}
 
-		// Show matrix!
-		for (int i = 0; i < minMult.length; i++)
-			if (DEBUG) System.out.println(Arrays.toString(minMult[i]));
-		// Found the answer!
-		return minMult[0][minMult.length - 1];
+		// if we made a cut, then store `result` and return it. Otherwise store and return 0
+		if(cut){
+			memo[start][end] = result;
+			return result;
+		}else{
+			memo[start][end] = 0l;
+			return 0l;
+		}
 	}
 }
