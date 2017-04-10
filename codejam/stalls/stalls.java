@@ -88,11 +88,10 @@ public class stalls {
       a[list.get(0)].used = true;
 
       // Case 3: Go left! (easy?)
-      else {
+
         a[list.get(0)].dist = -1;
         a[list.get(0)].used = true;
       }
-    }
 
     // After placing the person, update the distances for all stalls
 
