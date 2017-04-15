@@ -1,7 +1,7 @@
 import java.util.*;
 
 public class letters {
-  public static final boolean DEBUG = false;
+  public static final boolean DEBUG = true;
   public static int answer;
 
   @SuppressWarnings("unchecked")
@@ -167,7 +167,12 @@ class Tile implements Comparable<Tile> {
   }
 
   public int compareTo(Tile o) {
-    return  o.value - this.value;
+    if (o.value < this.value)
+      return -1;
+    else if (o.value > this.value)
+      return 1;
+    else return 0;
+    // return  o.value - this.value;
   }
 
   @Override
