@@ -167,12 +167,7 @@ class Tile implements Comparable<Tile> {
   }
 
   public int compareTo(Tile o) {
-    if (o.value < this.value)
-      return -1;
-    else if (o.value > this.value)
-      return 1;
-    else return 0;
-    // return  o.value - this.value;
+    return  o.value - this.value;
   }
 
   @Override
