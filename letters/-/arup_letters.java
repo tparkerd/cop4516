@@ -4,7 +4,8 @@
 
 import java.util.*;
 
-public class prob9 {
+public class arup_letters {
+	public static final boolean DEBUG = true;
 
 	// Important input information.
 	public static ArrayList[] scores;
@@ -35,25 +36,42 @@ public class prob9 {
 				scores[index].add(tmp);
 			}
 
+			for (int q = 0; q < scores.length; q++)
+				if (DEBUG) System.out.println(scores[q].toString());
+
 			// Sort in reverse order.
 			for (int i=0; i<26; i++) {
 				Collections.sort(scores[i]);
 				Collections.reverse(scores[i]);
 			}
 
+			if (DEBUG) System.out.println("Sort / Reverse");
+			for (int q = 0; q < scores.length; q++)
+				if (DEBUG) System.out.println(scores[q].toString());
+
+
 			// Make cumulative frequency array.
 			for (int i=0; i<26; i++) {
 				for (int j=1; j<scores[i].size(); j++) {
 					ArrayList<Integer> list = (ArrayList<Integer>)scores[i];
 					list.set(j, list.get(j-1)+list.get(j));
+					if (DEBUG) System.out.println( (char)('a' + i) + list.toString());
 				}
 			}
+
+			if (DEBUG) System.out.println("After freq");
+			for (int q = 0; q < scores.length; q++)
+				if (DEBUG) System.out.println(scores[q].toString());
+
+
 
 			// Read in all of the words.
 			numWords = stdin.nextInt();
 			words = new String[numWords];
 			for (int i=0; i<numWords; i++)
 				words[i] = stdin.next();
+
+			if (DEBUG) System.out.println("TileSum: " + tileSum);
 
 			// Solve this problem instance.
 			System.out.println(solve());

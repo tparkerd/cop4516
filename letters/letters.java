@@ -2,6 +2,7 @@ import java.util.*;
 
 public class letters {
   public static final boolean DEBUG = false;
+  public static int answer;
 
   @SuppressWarnings("unchecked")
   public static void main(String[] args) {
@@ -36,17 +37,38 @@ public class letters {
 
       if (DEBUG) System.out.println(Arrays.toString(words));
 
-      // Solve it!
-      System.out.println(solve(tiles, words));
+      // For each combination of words..
+      answer = 0;
+      solve(tiles, words, new boolean[words.length], 0);
+      System.out.println(answer);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public static void solve(PriorityQueue[] q, String[] words, boolean[] available, int k) {
+    if (k >= available.length) {
+      if (DEBUG) System.out.println("---------Dictionary---------");
+      if (DEBUG) System.out.println(Arrays.toString(available));
+      // System.out.println(process(clone(q), words, available));
+      answer = Math.max(answer, process(clone(q), words, available));
+      return;
+    }
+    for (int i = 0; i < 2; i++) {
+      available[k] = (i % 2 == 0);
+      solve(q, words, available, k + 1);
     }
   }
 
   @SuppressWarnings("unchecked")
   // Solves the actual board
-  public static int solve(PriorityQueue[] q, String[] words) {
+  public static int process(PriorityQueue[] q, String[] words, boolean[] available) {
     int total = 0;
     // For each known word, try to create it
     for (int w = 0; w < words.length; w++) {
+      // Check if the word is available for this combination of the dictionary
+      if (!available[w]) continue;
+      if (DEBUG) System.out.println("Case: " + words[w]);
+
       // Look up each letter in the array of PriorityQueues
       // Make sure to save each one to a temp ArrayList<Tile>
       // We're use said ArrayList to look back through if the word
@@ -55,7 +77,6 @@ public class letters {
       // If invalid, offer each of the letters back to the array of
       // PriorityQueues
       // Otherwise, just move on and add that score to the running total
-      if (DEBUG) System.out.println("Case: " + words[w]);
       // For each letter in the word...
 
       Stack<Tile> processedTiles = new Stack<Tile>();
@@ -113,11 +134,20 @@ public class letters {
     if (DEBUG) System.out.println("Solution: " + (total - unusedPoints));
     return (total - unusedPoints);
   }
+
+  @SuppressWarnings("unchecked")
+  public static PriorityQueue<Tile>[] clone(PriorityQueue<Tile>[] o) {
+    PriorityQueue[] tmp = new PriorityQueue[26];
+    for (int i = 0; i < 26; i++) {
+      tmp[i] = new PriorityQueue(o[i]);
+    }
+    return tmp;
+  }
 }
 
 class Tile implements Comparable<Tile> {
-  char id;
-  int value;
+  public char id;
+  public int value;
 
   public Tile(char id, int value) {
     this.id = id;
