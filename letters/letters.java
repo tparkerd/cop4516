@@ -1,7 +1,7 @@
 import java.util.*;
 
 public class letters {
-  public static final boolean DEBUG = true;
+  public static final boolean DEBUG = false;
   public static int answer;
 
   @SuppressWarnings("unchecked")
@@ -17,12 +17,14 @@ public class letters {
         tiles[t] = new PriorityQueue<Tile>();
       // Get the number of tiles in the person's hand
       int nTilesTypes = Integer.parseInt(stdin.nextLine());
+      answer = 0;
       // For each tile, add it to the list of tiles available
       for (int t = 0; t < nTilesTypes; t++) {
         String[] tileLine = stdin.nextLine().split(" ");
         int tileIndexByCharacter = tileLine[0].charAt(0) - 'a';
         Tile newTile = new Tile(tileLine[0].charAt(0), Integer.parseInt(tileLine[1]));
         tiles[tileIndexByCharacter].offer(newTile);
+        answer += newTile.value;
       }
 
       if (DEBUG) System.out.println("--------Tiles--------");
@@ -35,7 +37,7 @@ public class letters {
         words[w] = stdin.nextLine();
 
       // Solve it!
-      answer = 0;
+      answer = -answer;
       solve(tiles, words, new boolean[words.length], 0);
       System.out.println(answer);
     }
@@ -57,7 +59,9 @@ public class letters {
         }
         System.out.println("\n----------------------------");
       }
-      answer = Math.max(answer, process(clone(q), words, available));
+      int caseResult = process(clone(q), words, available);
+      if (DEBUG) System.out.printf("answer = Math.max(%d, %d);\n", answer, caseResult);
+      answer = Math.max(answer, caseResult);
       return;
     }
     // Flip the word either available or unavailable
