@@ -9,7 +9,7 @@ public class intersect {
   // trying to avoid dividing by zero in the future for the line in plane case.
   public static boolean overlapFlag;
 
-  public static final boolean DEBUG = true;
+  public static final boolean DEBUG = false;
   public static void main(String[] args) {
     Scanner stdin = new Scanner(System.in);
     int nCases = stdin.nextInt();
@@ -83,9 +83,9 @@ class Vector3 {
   }
 
   public Vector3(Point3 a, Point3 b) {
-    this.x = a.x - b.x;
-    this.y = a.y - b.y;
-    this.z = a.z - b.z;
+    this.x = b.x - a.x;
+    this.y = b.y - a.y;
+    this.z = b.z - a.z;
     this.pt = new Point3(a);
   }
 
@@ -170,6 +170,11 @@ class Plane3 {
     Vector3 AC = new Vector3(a, c);
     this.v = AB.cross(AC);
     this.d = Math.sqrt(this.v.magsq()); // Sqrt(x*x + y*y + z*z)
+    // Make vector a unit vector
+    this.v.x /= this.d;
+    this.v.y /= this.d;
+    this.v.z /= this.d;
+    this.d = a.x * this.v.x + a.y * this.v.y + a.z * this.v.z; // Excuse me, wtf!
   }
   public String toString() {
     return a+", "+b+", "+c;
