@@ -1,6 +1,12 @@
+// Solution Draft to Intersect for COP 4516 Spring 2017
+
 import java.util.*;
 
 public class intersect {
+  // TODO(timp): I plan to use this to test for the degenerate case of
+  // when the line lies on the plan itself. This may have to be reworked
+  // to also flag for when there is no intersection at all. I'm just
+  // trying to avoid dividing by zero in the future for the line in plane case.
   public static boolean overlapFlag;
 
   public static final boolean DEBUG = true;
@@ -15,14 +21,8 @@ public class intersect {
       // Get line input
       Point3 start = new Point3(stdin.nextInt(), stdin.nextInt(), stdin.nextInt());
       Point3 end   = new Point3(stdin.nextInt(), stdin.nextInt(), stdin.nextInt());
-      Line3  line  = new Line3(start, end);
-
-      if (DEBUG) System.out.println(line);
-
-      // Create a direction vector of the line
-      Vector3 directionVectorOfLine = new Vector3(line);
-
-      if (DEBUG) System.out.println(directionVectorOfLine);
+      Vector3 line = new Vector3(start, end); // This is the direction vector of the line
+      if (DEBUG) System.out.println("Line vector: " + line);
 
       // Get plane input
       Point3 a     = new Point3(stdin.nextInt(), stdin.nextInt(), stdin.nextInt());
@@ -30,69 +30,55 @@ public class intersect {
       Point3 c     = new Point3(stdin.nextInt(), stdin.nextInt(), stdin.nextInt());
       Plane3 plane = new Plane3(a, b, c);
 
-      if (DEBUG) System.out.println(plane);
+      if (DEBUG) System.out.println("Points of Plane [" + plane + "]");
+      if (DEBUG) System.out.println("Normal Vector of Plane " + plane.v);
+      if (DEBUG) System.out.println("Magnitude of Normal Vector of Plane: " + plane.d);
 
-      // // Assume that the line does not lie on the plane
-      // Point3 answer = line.intersects(plane);
-      // overlapFlag = false;
-      // if (overlapFlag) {
-      // } else if (answer != null) {
-      //   System.out.println("The intersection is the point " + answer.toString());
-      // } else {
-      //   System.out.println("There is no intersection.");
-      // }
-
+      // Assume that the line does not lie on the plane
+      overlapFlag = false;
+      // Solve!
+      Point3 answer = line.intersects(plane);
+      // Output answer!
+      if (answer != null) {
+        System.out.printf("The intersection is the point (%.1f, %.1f, %.1f).\n\n",answer.x, answer.y, answer.z);
+      } else {
+        if (overlapFlag) {
+          System.out.println("The line lies on the plane.\n");
+        } else {
+          System.out.println("There is no intersection.\n");
+        }
+      }
     }
   }
 }
 
-
 class Point3 {
-  float x, y, z;
+  double x, y, z;
 
+  // NOTE(timp): In case I need to copy a point
   public Point3(Point3 p) {
     this.x = p.x; this.y = p.y; this.z = p.z;
   }
 
-  public Point3(int x, int y, int z) {
+  public Point3(double x, double y, double z) {
     this.x = x; this.y = y; this.z = z;
   }
 
   public String toString() {
-    return "Point3("+x+", "+y+", "+z+")";
-  }
-}
-
-class Line3 {
-  Point3 a; // Start
-  Point3 b; // End
-  Vector3 v;
-
-  public Line3(Line3 l) {
-    this.a = l.a; this.b = l.b;
-  }
-
-  public Line3(Point3 a, Point3 b) {
-    this.a = a; this.b = b;
-    this.v = new Vector3(this.a, this.b);
-  }
-
-  public String toString() {
-    return "Line3( "+a+", "+b+" )";
-  }
-
-  public Point3 intersects(Plane3 p) {
-
-    return new Point3(-1,2,1);
-
-    // return null;
+    return "("+x+", "+y+", "+z+")";
   }
 }
 
 class Vector3 {
-  public float x, y, z;
+  public double x, y, z;
+  Point3 pt; // Some arbitrarily chosen point, so I picked first point provided
 
-  public Vector3(float x, float y, float z) {
+  // NOTE(timp): In case I need to copy a vector
+  public Vector3(Vector3 v) {
+    this.x = v.x; this.y = v.y; this.z = v.z;
+  }
+
+  public Vector3(double x, double y, double z) {
     this.x = x; this.y = y; this.z = z;
   }
 
@@ -100,24 +86,63 @@ class Vector3 {
     this.x = a.x - b.x;
     this.y = a.y - b.y;
     this.z = a.z - b.z;
+    this.pt = new Point3(a);
   }
 
-  public Vector3(Line3 l) {
-    this.x = l.a.x - l.b.x;
-    this.y = l.a.y - l.b.y;
-    this.z = l.a.z - l.b.z;
+  public Vector3 cross(Vector3 v) {
+    return new Vector3((y * v.z - z * v.y), (z * v.x - x * v.z), (x * v.y-y * v.x));
   }
 
-  public Vector3 cross(Vector3 o) {
-    return new Vector3((y * o.z - z * o.y), (z * o.x - x * o.z), (x * o.y-y * o.x));
-  }
-
-  public float magsq() {
+  public double magsq() {
     return x*x + y*y + z*z;
   }
 
-  public float dot(Vector3 other) {
-    return x*other.x + y*other.y + z*other.z;
+  public double dot(Vector3 v) {
+    return x*v.x + y*v.y + z*v.z;
+  }
+
+  // The functional method of this program!
+  public Point3 intersects(Plane3 p) {
+    // All the constants will be the position vector, i.e., some point on the line
+    if (intersect.DEBUG) System.out.println("Constant Terms: <" + this.pt + ">");
+
+    // λ coefficients will be all those in the direction vector of the line
+    if (intersect.DEBUG) System.out.println("λ coefficients: " + this);
+
+
+    // Plane equation is each component multiplied by the respective normal
+    // vector of the plane
+
+    if (intersect.DEBUG) System.out.printf("Plane equation: %.1f(%.1f + %.1fλ) + %.1f(%.1f + %.1fλ) + %.1f(%.1f + %.1fλ) = %.3f\n", p.v.x, pt.x, this.x, p.v.y, pt.y, this.y, p.v.z, pt.z, this.z, p.d);
+
+    // Gather all constant terms from the plane equation
+    double constantTerm = (p.v.x * pt.x) + (p.v.y * pt.y) + (p.v.z * pt.z);
+    if (intersect.DEBUG) System.out.printf("K: %.2f\t", constantTerm);
+
+    // Gather all λ terms
+    double lambdaCoefficient = (p.v.x * this.x) + (p.v.y * this.y) + (p.v.z * this.z);
+    if (intersect.DEBUG) System.out.printf("K_λ: %.1f\n", lambdaCoefficient);
+
+    // If the coefficient for lambda is zero, we have a degenerate case
+    if (lambdaCoefficient == 0) {
+      // If the constant is the same as the actual magnitude of the plane's
+      // normal vector, the line lies on the plane
+      if (constantTerm == p.d)
+        intersect.overlapFlag = true;
+
+      return null;
+    }
+
+    // Solve for the unknown, λ.
+    double lambda = (p.d - constantTerm) / lambdaCoefficient;
+    if (intersect.DEBUG) System.out.printf("λ: %.2f\n", lambda);
+
+    // Plug in λ into the parametric equations for the line to find
+    // point of intersection
+    double newX = lambda * this.x + pt.x;
+    double newY = lambda * this.y + pt.y;
+    double newZ = lambda * this.z + pt.z;
+    return new Point3(newX, newY, newZ);
   }
 
   public String toString() {
@@ -127,18 +152,26 @@ class Vector3 {
 
 class Plane3 {
   public Point3 a, b, c;
-  // TODO(timp) : Need to figure how how to convert the points to a vector
-  Vector3 v; // Need to figure how how to convert the plane to have just
-             // the vector and its distance from the origin
+  Vector3 v; // perpendicular vector to plane
+  double d; // distance from the origin
 
+  // NOTE(timp): In case I need to copy a plane
   public Plane3(Plane3 p) {
-    this.a = p.a; this.b = p.b; this.c = p.c;
+    this.a = p.a; this.b = p.b; this.c = p.c; this.v = p.v; this.d = p.d;
   }
 
   public Plane3(Point3 a, Point3 b, Point3 c) {
     this.a = a; this.b = b; this.c = c;
+    // Get the vectors from one of the points, arbitrarily chosen to always
+    // be A. From this, we can get an perpendicular vector to the plane.
+    // In short, the vector that points outward from the face of our
+    // 'piece of paper', like discussed in lecture.
+    Vector3 AB = new Vector3(a, b);
+    Vector3 AC = new Vector3(a, c);
+    this.v = AB.cross(AC);
+    this.d = Math.sqrt(this.v.magsq()); // Sqrt(x*x + y*y + z*z)
   }
   public String toString() {
-    return "Plane3( "+a+", "+b+", "+c+" )";
+    return a+", "+b+", "+c;
   }
 }
