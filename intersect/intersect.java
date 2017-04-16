@@ -19,6 +19,7 @@ public class intersect {
 
       if (DEBUG) System.out.println(line);
 
+      // Create a direction vector of the line
       Vector3 directionVectorOfLine = new Vector3(line);
 
       if (DEBUG) System.out.println(directionVectorOfLine);
