@@ -4,10 +4,7 @@
 import java.util.*;
 
 public class intersect {
-  // TODO(timp): I plan to use this to test for the degenerate case of
-  // when the line lies on the plan itself. This may have to be reworked
-  // to also flag for when there is no intersection at all. I'm just
-  // trying to avoid dividing by zero in the future for the line in plane case.
+  // Flag to test for degenerate case: lines lies on plane
   public static boolean overlapFlag;
 
   public static final boolean DEBUG = false;
@@ -110,10 +107,8 @@ class Vector3 {
     // λ coefficients will be all those in the direction vector of the line
     if (intersect.DEBUG) System.out.println("λ coefficients: " + this);
 
-
     // Plane equation is each component multiplied by the respective normal
     // vector of the plane
-
     if (intersect.DEBUG) System.out.printf("Plane equation: %.1f(%.1f + %.1fλ) + %.1f(%.1f + %.1fλ) + %.1f(%.1f + %.1fλ) = %.3f\n", p.v.x, pt.x, this.x, p.v.y, pt.y, this.y, p.v.z, pt.z, this.z, p.d);
 
     // Gather all constant terms from the plane equation
@@ -176,7 +171,8 @@ class Plane3 {
     this.v.x /= this.d;
     this.v.y /= this.d;
     this.v.z /= this.d;
-    this.d = a.x * this.v.x + a.y * this.v.y + a.z * this.v.z; // Excuse me, wtf!
+     // Scale down the magnitude to match the unit vector
+    this.d = a.x * this.v.x + a.y * this.v.y + a.z * this.v.z;
   }
   public String toString() {
     return a+", "+b+", "+c;

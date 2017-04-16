@@ -1,3 +1,6 @@
+// Solution Candidate to Lettersor COP 4516, Spring 2017
+// By Tim Parker
+
 import java.util.*;
 
 public class letters {

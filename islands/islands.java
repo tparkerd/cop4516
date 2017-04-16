@@ -1,3 +1,6 @@
+// Solution candidate to Islands, COP 4516: Spring 2017
+// By Tim Parker
+
 import java.util.*;
 
 public class islands {
@@ -13,21 +16,20 @@ public class islands {
      for (int j = 0; j < 12; j++) {
        a[j] = stdin.nextInt();
      }
-     if (DEBUG) System.out.println(Arrays.toString(a));
      System.out.println(solve(a));
     }
   }
 
   public static int solve(int[] a) {
     int islandCount = 0;
+    // For each possible width of an island...
     for (int width = 1; width < 11; width++) {
       for (int start = 1; start <= 10 - width + 1;  start++) {
-        if (DEBUG) System.out.println("--------Process Case--------");
+        // Find the minimum value for the current island to check again the
+        // boundary elements
         int minValue = findMin(a, start, start + width);
-        if (DEBUG) System.out.println("Min Value: " + minValue);
-        if (DEBUG) System.out.printf("a[%d] (%d) > %d && a[%d] (%d) > %d\n", start - 1, a[start -1], minValue, start + width, a[start + width], minValue);
+        // Check if the current island of length 'width' is an island
         if (a[start - 1] < minValue && a[start + width] < minValue) {
-          if (DEBUG) System.out.println("\n!~ Inc\n");
           islandCount++;
         }
       }
@@ -38,7 +40,6 @@ public class islands {
   public static int findMin(int[] a, int start, int end) {
     int[] tmp = Arrays.copyOfRange(a, start, end);
     int min = tmp[0];
-    if (DEBUG) System.out.println(Arrays.toString(tmp));
     for (int i = 0; i < tmp.length; i++) {
       if (min > tmp[i])
         min = tmp[i];
