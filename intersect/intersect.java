@@ -1,4 +1,5 @@
-// Solution Draft to Intersect for COP 4516 Spring 2017
+// Solution Candidate to Intersect for COP 4516 Spring 2017
+// By Tim Parker
 
 import java.util.*;
 
@@ -127,7 +128,8 @@ class Vector3 {
     if (lambdaCoefficient == 0) {
       // If the constant is the same as the actual magnitude of the plane's
       // normal vector, the line lies on the plane
-      if (constantTerm == p.d)
+      // Within a margin of error because rounding is a pain in the ass
+      if (Math.abs(constantTerm - p.d) < 1e-6)
         intersect.overlapFlag = true;
 
       return null;
