@@ -203,85 +203,29 @@ class Plane3 {
     this.v.z /= this.d;
      // Scale down the magnitude to match the unit vector
     this.d = a.x * this.v.x + a.y * this.v.y + a.z * this.v.z;
-
-
-    // How to find if
-    // Calculate the centroid of the yield sign
-    this.centroid = new Point3( (a.x + b.x + c.x) / 3, (a.y + b.y + c.y) / 3, (a.z + b.z + c.z) / 3  );
-    if (russell.DEBUG) System.out.println("Centroid: " + this.centroid);
-    // Add first point distance/magnitude
-    double A = Math.sqrt( Math.pow(centroid.x - a.x, 2) + Math.pow(centroid.y - a.y, 2) + Math.pow(centroid.z - a.z, 2) );
-    // Add second point distance/magnitude
-    double B = Math.sqrt( Math.pow(centroid.x - b.x, 2) + Math.pow(centroid.y - b.y, 2) + Math.pow(centroid.z - b.z, 2) );
-    // Add third point distance/magnitude
-    if (russell.DEBUG) System.out.printf("Cent: %.2f, Cz: %.2f\n", centroid.z, c.z);
-
-    double C = Math.sqrt( Math.pow(centroid.x - c.x, 2) + Math.pow(centroid.y - c.y, 2) + Math.pow(centroid.z - c.z, 2) );
-    if (russell.DEBUG) System.out.printf("A: %.2f, B: %.2f, C: %.2f\n", A, B, C);
-    this.lengthToCenter = A + B + C;
-  }
-
-  public double distanceToIntersectionPoint(Point3 p) {
-    double distance = 0;
-    // Add first point distance/magnitude
-    distance += Math.sqrt( Math.pow(p.x - a.x, 2) + Math.pow(p.y - a.y, 2) + Math.pow(p.z - a.z, 2) );
-    // Add second point distance/magnitude
-    distance += Math.sqrt( Math.pow(p.x - b.x, 2) + Math.pow(p.y - b.y, 2) + Math.pow(p.z - b.z, 2) );
-    // Add third point distance/magnitude
-    distance += Math.sqrt( Math.pow(p.x - c.x, 2) + Math.pow(p.y - c.y, 2) + Math.pow(p.z - c.z, 2) );
-    return distance;
   }
 
   public boolean contains(Point3 p) {
-    // if (russell.DEBUG) System.out.println("Centroid distance: " + lengthToCenter);
-    // if (russell.DEBUG) System.out.println("Intersect distance: " + this.distanceToIntersectionPoint(p));
-    // return (Math.abs(lengthToCenter - this.distanceToIntersectionPoint(p)) < 1e-6);
-    // // I have no idea what I'm doing at this point, but I thought the length of any point within the
-    // // triangle would have to have a sum of segments bisecting the angles of each vertex, so
-    // // the distance to the centroid would be equal to any point within the sign
-
-
     // TODO(timp): Figure out how to do a point-in-poly, one down the z-axis
     // and another down the x-axis, possibly a third down the y-axis
 
-    // // Point in poly
-    // // From front, ignoring the z-axis
-    // double xyAngle = 0;
-    // double yzAngle = 0;
-    // // For each vertex of the yield sign...
-    // double aAngle = Math.abs(Math.atan2(p.x - a.x, p.y - a.y));
-    // double bAngle = Math.abs(Math.atan2(p.x - b.x, p.y - b.y));
-    // double cAngle = Math.abs(Math.atan2(p.x - c.x, p.y - c.y));
-    // if (russell.DEBUG) System.out.println("Ignore the Z");
-    // if (russell.DEBUG) System.out.printf("∠ A %.3f\t∠ B %.3f\t∠ C %.3f\n", aAngle, bAngle, cAngle);
-    // if (russell.DEBUG) System.out.println(aAngle + bAngle + cAngle);
-    //
-    // if (russell.DEBUG) System.out.println("Ignore the X");
-    // aAngle = Math.abs(Math.atan2(p.y - a.y, p.z - a.z));
-    // bAngle = Math.abs(Math.atan2(p.y - b.y, p.z - b.z));
-    // cAngle = Math.abs(Math.atan2(p.y - c.y, p.z - c.z));
-    // if (russell.DEBUG) System.out.printf("∠ A %.3f\t∠ B %.3f\t∠ C %.3f\n", aAngle, bAngle, cAngle);
-    // if (russell.DEBUG) System.out.println(aAngle + bAngle + cAngle);
-    //
-    // if (russell.DEBUG) System.out.println("Ignore the Y");
-    // aAngle = Math.abs(Math.atan2(p.x - a.x, p.z - a.z));
-    // bAngle = Math.abs(Math.atan2(p.x - b.x, p.z - b.z));
-    // cAngle = Math.abs(Math.atan2(p.x - c.x, p.z - c.z));
-    // if (russell.DEBUG) System.out.printf("∠ A %.3f\t∠ B %.3f\t∠ C %.3f\n", aAngle, bAngle, cAngle);
-    // if (russell.DEBUG) System.out.println(aAngle + bAngle + cAngle);
-
-
     // Let's try vector math!
-    // Vector3 PA = new Vector3(p, this.a);
-    // Vector3 PB = new Vector3(p, this.b);
-    Vector3 PA = new Vector3(new Point3(0,0,0), new Point3(1,0,0));
-    Vector3 PB = new Vector3(new Point3(0,0,0), new Point3(0,1,0));
-    double dotProduct = PA.dot(PB);
-    double PAmag = Math.sqrt(PA.magsq());
-    double PBmag = Math.sqrt(PB.magsq());
-    double theta = Math.acos(dotProduct/(PAmag * PBmag));
-
+    // Ignore the Z axis and find the angle between the intersection point and
+    // and the polygon (yield sign)
+    // God damn it Arup. I only know how to do this in 2D, not 3D, so now
+    // I have to make a Vector2 D:<
+    Vector3 PA = new Vector3(p, this.a);
+    Vector3 PB = new Vector3(p, this.b);
+    Vector3 PC = new Vector3(p, this.c);
+    double ABtheta, BCtheta, CAtheta, theta;
+    theta = Math.acos(PA.dot(PB)/(Math.sqrt(PA.magsq()) * Math.sqrt(PB.magsq())));
     if (russell.DEBUG) System.out.println("Θ = " + theta);
+
+    // Kinda works! Now to create all the points and vectors in 2D so I can
+    // ignore one of the dimensions.
+
+    // TODO(timp):
+
 
     return false;
 
@@ -290,4 +234,42 @@ class Plane3 {
   public String toString() {
     return a+", "+b+", "+c;
   }
+}
+
+class Vector2 {
+
+    public double x;
+    public double y;
+
+    public Vector2(double myx, double myy) {
+        x = myx;
+        y = myy;
+    }
+
+    public Vector2(Point2 start, Point2 end) {
+        x = end.x - start.x;
+        y = end.y - start.y;
+    }
+
+    public double dot(Vector2 other) {
+        return this.x*other.x + this.y*other.y;
+    }
+
+    public double mag() {
+        return Math.sqrt(x*x+y*y);
+    }
+
+    // Thjs formula comes from using the relationship between the dot product and
+    // the cosine of the included angle.
+    public double angle(Vector2 other) {
+        return Math.acos(this.dot(other)/mag()/other.mag());
+    }
+
+    public double signedCrossMag(Vector2 other) {
+        return this.x*other.y-other.x*this.y;
+    }
+
+    public double crossMag(Vector2 other) {
+        return Math.abs(signedCrossMag(other));
+    }
 }
