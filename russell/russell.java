@@ -3,48 +3,44 @@
 import java.util.*;
 
 public class russell {
-  public static final boolean DEBUG = true;
+  public static final boolean DEBUG = false;
   public static void main(String[] args) {
     Scanner stdin = new Scanner(System.in);
-    int counter = 1;
     while (stdin.hasNext()) {
-      if (DEBUG) System.out.println("Case #" + counter++);
+      // Galactic Yield Sign (a plane)
+      Point3 a     = new Point3(stdin.nextDouble(), stdin.nextDouble(), stdin.nextDouble());
+      Point3 b     = new Point3(stdin.nextDouble(), stdin.nextDouble(), stdin.nextDouble());
+      Point3 c     = new Point3(stdin.nextDouble(), stdin.nextDouble(), stdin.nextDouble());
+      Plane3 plane = new Plane3(a, b, c);
 
-        // Galactic Yield Sign (a plane)
-        Point3 a     = new Point3(stdin.nextDouble(), stdin.nextDouble(), stdin.nextDouble());
-        Point3 b     = new Point3(stdin.nextDouble(), stdin.nextDouble(), stdin.nextDouble());
-        Point3 c     = new Point3(stdin.nextDouble(), stdin.nextDouble(), stdin.nextDouble());
-        Plane3 plane = new Plane3(a, b, c);
+      // Position of Russell's telescope (s) & point to look at (e)
+      Point3 s = new Point3(stdin.nextDouble(), stdin.nextDouble(), stdin.nextDouble());
+      Point3 e = new Point3(stdin.nextDouble(), stdin.nextDouble(), stdin.nextDouble());
 
-        // Position of Russell's telescope
-        Point3 s = new Point3(stdin.nextDouble(), stdin.nextDouble(), stdin.nextDouble());
-        // Point to look at
-        Point3 e = new Point3(stdin.nextDouble(), stdin.nextDouble(), stdin.nextDouble());
+      // Make a line of sight out from telescope to point to look at
+      Vector3 directionVector = new Vector3(s, e);
+      Line3 segment = new Line3(s, e);
 
-        // Make a line of sight out from telescope to point to look at
-        Vector3 directionVector = new Vector3(s, e);
-        Line3 segment = new Line3(s, e);
+      if (DEBUG) System.out.println("Line: " + s + " " + e);
+      if (DEBUG) System.out.println("Plane: " + plane);
 
-        if (DEBUG) System.out.println("Line: " + s + " " + e);
-        if (DEBUG) System.out.println("Plane: " + plane);
+      // Solve!
+      Point3 intersectionPoint = directionVector.intersects(plane);
+      boolean yieldSignContainsPoint = plane.contains(intersectionPoint);
+      boolean intersectionPointOnSegment = intersectionPoint.liesOn(segment);
 
-        // Solve!
-        Point3 intersectionPoint = directionVector.intersects(plane);
-        boolean yieldSignContainsPoint = plane.contains(intersectionPoint);
-        boolean intersectionPointOnSegment = intersectionPoint.liesOn(segment);
+      // Show the point of intersection for the vector and the plane
+      if (intersectionPoint != null)
+        if (DEBUG) System.out.println("intersectionPoint: " + intersectionPoint);
 
-        if (intersectionPoint != null)
-          if (DEBUG) System.out.println("intersectionPoint: " + intersectionPoint);
-
-        if (yieldSignContainsPoint && intersectionPointOnSegment) {
-          System.out.println("No");
-        } else {
-          System.out.println("Yes");
-        }
-
-        if (DEBUG) System.out.println();
-        if (DEBUG) System.out.println();
-
+      // Check if it's within the polygon but ALSO, that the point of intersection
+      // is also on the line segment that defines the line of sight from
+      // Russell's telescope to the point of interest
+      if (yieldSignContainsPoint && intersectionPointOnSegment) {
+        System.out.println("No");
+      } else {
+        System.out.println("Yes");
+      }
     }
   }
 }
@@ -53,7 +49,6 @@ public class russell {
 class Point3 {
   double x, y, z;
 
-  // NOTE(timp): In case I need to copy a point
   public Point3(Point3 p) {
     this.x = p.x; this.y = p.y; this.z = p.z;
   }
@@ -63,21 +58,13 @@ class Point3 {
   }
 
   public boolean liesOn(Line3 l) {
-    // TODO(timp): Work out algebra and come up with formula to
-    // check if a point is on a line segment
-    // Something something... distance from point to both end points
-    // sum is the length of the line means it's on the line?
-
     // Get magnitude of the line
-    // Line segments
+    // Get the magnitude of the line segment and the segments
+    // created by 'splitting' it at the intersection point
     double AC = l.mag;
     double AB = Math.sqrt(Math.pow(x - l.a.x, 2) + Math.pow(y - l.a.y, 2) + Math.pow(z - l.a.z, 2));
     double BC = Math.sqrt(Math.pow(l.b.x - x, 2) + Math.pow(l.b.y - y, 2) + Math.pow(l.b.z - z, 2));
-    if (russell.DEBUG) System.out.println("Mag: " + AC);
-    if (russell.DEBUG) System.out.println("AB: " + AB);
-    if (russell.DEBUG) System.out.println("BC: " + BC);
-    if (russell.DEBUG) System.out.println("AB + BC: " + (BC + AB));
-    return (Math.abs(AC - AB - BC) < 1e-5);
+    return (Math.abs(AC - AB - BC) < 1e-9);
   }
 
   public String toString() {
@@ -87,12 +74,10 @@ class Point3 {
 
 class Vector3 {
   double x, y, z;
-  // double mag;
   Point3 pt; // Some arbitrarily chosen point, so I picked first point provided
 
-  // NOTE(timp): In case I need to copy a vector
   public Vector3(Vector3 v) {
-    this.x = v.x; this.y = v.y; this.z = v.z;
+    this.x = v.x; this.y = v.y; this.z = v.z; this.pt = v.pt;
   }
 
   public Vector3(double x, double y, double z) {
@@ -162,7 +147,7 @@ class Vector3 {
 
 class Line3 {
   Point3 a, b; // start and end points
-  double mag; // magnitude
+  double mag;  // magnitude
   Vector3 unitVector;
 
   public Line3(Point3 a, Point3 b) {
@@ -173,18 +158,14 @@ class Line3 {
 }
 
 class Plane3 {
-  public Point3 a, b, c;
+  public Point3 a, b, c; // Vertices that define the plane
   Vector3 v; // perpendicular vector to plane
-  Point3 centroid;
-  double lengthToCenter;
   double d; // distance from the origin
 
   // NOTE(timp): In case I need to copy a plane
   public Plane3(Plane3 p) {
     this.a = p.a; this.b = p.b; this.c = p.c;
     this.v = p.v; this.d = p.d;
-    this.centroid = p.centroid;
-    this.lengthToCenter = p.lengthToCenter;
   }
 
   public Plane3(Point3 a, Point3 b, Point3 c) {
@@ -205,71 +186,30 @@ class Plane3 {
     this.d = a.x * this.v.x + a.y * this.v.y + a.z * this.v.z;
   }
 
+  // Determines if a point lies within a polygon
+  // Right now it's hardcoded to be a triangle, but using an arraylist
+  // of points, we could repurpose this to be any polygon
   public boolean contains(Point3 p) {
-    // TODO(timp): Figure out how to do a point-in-poly, one down the z-axis
-    // and another down the x-axis, possibly a third down the y-axis
-
     // Let's try vector math!
-    // Ignore the Z axis and find the angle between the intersection point and
-    // and the polygon (yield sign)
-    // God damn it Arup. I only know how to do this in 2D, not 3D, so now
-    // I have to make a Vector2 D:<
-    Vector3 PA = new Vector3(p, this.a);
-    Vector3 PB = new Vector3(p, this.b);
-    Vector3 PC = new Vector3(p, this.c);
+    // Sum the angles of the vectors from the intersection point to the vertices
+    // of the yield sign
+    // P = intersection point
+    Vector3 PA = new Vector3(p, this.a); // Intersection point to A
+    Vector3 PB = new Vector3(p, this.b); // Intersection point to B
+    Vector3 PC = new Vector3(p, this.c); // Intersection point to C
     double ABtheta, BCtheta, CAtheta, theta;
+    // Find the angles of ΔPAB, ΔPBC, and ΔPCA
     theta = Math.acos(PA.dot(PB)/(Math.sqrt(PA.magsq()) * Math.sqrt(PB.magsq())));
+    theta += Math.acos(PB.dot(PC)/(Math.sqrt(PB.magsq()) * Math.sqrt(PC.magsq())));
+    theta += Math.acos(PC.dot(PA)/(Math.sqrt(PC.magsq()) * Math.sqrt(PA.magsq())));
     if (russell.DEBUG) System.out.println("Θ = " + theta);
 
-    // Kinda works! Now to create all the points and vectors in 2D so I can
-    // ignore one of the dimensions.
-
-    // TODO(timp):
-
-
-    return false;
-
+    // The angles between each of the point to vertex sum to 2π, it's within
+    // the polygon
+    return (2 * Math.PI - theta) < 1e-9;
   }
 
   public String toString() {
     return a+", "+b+", "+c;
   }
-}
-
-class Vector2 {
-
-    public double x;
-    public double y;
-
-    public Vector2(double myx, double myy) {
-        x = myx;
-        y = myy;
-    }
-
-    public Vector2(Point2 start, Point2 end) {
-        x = end.x - start.x;
-        y = end.y - start.y;
-    }
-
-    public double dot(Vector2 other) {
-        return this.x*other.x + this.y*other.y;
-    }
-
-    public double mag() {
-        return Math.sqrt(x*x+y*y);
-    }
-
-    // Thjs formula comes from using the relationship between the dot product and
-    // the cosine of the included angle.
-    public double angle(Vector2 other) {
-        return Math.acos(this.dot(other)/mag()/other.mag());
-    }
-
-    public double signedCrossMag(Vector2 other) {
-        return this.x*other.y-other.x*this.y;
-    }
-
-    public double crossMag(Vector2 other) {
-        return Math.abs(signedCrossMag(other));
-    }
 }
