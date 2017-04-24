@@ -16,78 +16,64 @@ public class trade {
 			int n = stdin.nextInt();
 			int s = stdin.nextInt();
 
-			// Sandwich Dictionary to hold values of sandwiches
+			// Sandwich value look-up table
 			sandwiches = new int[s + 1];
-			for (int j = 1; j < sandwiches.length; j++) {
-				int value = stdin.nextInt();
-				sandwiches[j] = value;
-			}
+			for (int j = 1; j < sandwiches.length; j++)
+				sandwiches[j] = stdin.nextInt();
 
-
-			// Make a graph~!
+			// Gather trading info for all the students
 			students = new Student[n + 1];
-
-			// Populate graph~!
-			// I accept any sandwiches!
-			students[0] = new Student(0, 1);
+			// Starting student accepts any sandwiches!
+			students[0] = new Student(1);
 			for (int j = 1; j <= s; j++)
 				students[0].accepts.add(j);
 
-			// Create a student each time and add them to the graph with the sandwich
-			// that they start out with
+			// Add remaining students
 			for (int j = 1; j <= n; j++) {
 				int d = stdin.nextInt();
 				int t = stdin.nextInt();
-				students[j] = new Student(j, d);
-				for (int k = 0; k < t; k++) {
-					int tmp = stdin.nextInt();
-					students[j].accepts.add(tmp);
-				}
+				students[j] = new Student(d);
+				// Get all the sandwiches they are willing to accept
+				for (int k = 0; k < t; k++)
+					students[j].accepts.add(stdin.nextInt());
 			}
 
-			int[][] matrix = new int[n + 1][n + 1];
-
+			// Make a graph~!
 			ArrayList<Integer>[] graph = new ArrayList[n + 1];
 			for (int j = 0; j < graph.length; j++)
 				graph[j] = new ArrayList<Integer>();
 
+			// Populate graph~!
+			// Convert all the student data to a graph
 			// For each student...
-			for (int j = 0; j < matrix.length; j++) {
+			for (int j = 0; j < graph.length; j++) {
 				// Get all the sandwiches that they accept
 				for (int k = 0; k < students[j].accepts.size(); k++) {
 					// For all the sandwiches that they accept, see who has them to start
 					for (int l = 0; l < students.length; l++) {
-						// Does this student have the desired sandwich?
-						// If so, I can trade with them.
-						if (l == j) continue; // skip self cycles
+						if (l == j) continue; // skip self cycles, possibly unnecessary***
+						// If the main student (J-th) accepts the starting sandwich of the
+						// current student (L-th student of all students)
 						if (students[j].accepts.get(k) == students[l].sandwichType) {
-							matrix[l][j] = 1;
 							graph[l].add(j);
 						}
 					}
 				}
 			}
 
-
-
-
-			// for (int j = 0; j < matrix.length; j++) {
-			// 	for (int k = 0; k < matrix.length; k++) {
-			// 		if (matrix[j][k] == 1) {
-			// 			graph[j].add(k);
-			// 		}
-			// 	}
-			// }
+			// Solve!
 			System.out.println(DFS(graph, 0));
 		}
 	}
 
 	// Try to connect each of the students by means of trading their sandwiches
+	// Return the value of the most valuable sandwich found
 	public static int DFS(ArrayList<Integer>[] graph, int s) {
 		// s = start node, the PBn'J sandwich
 		 // Assume that the PBn'J is the best at first
 		int max = sandwiches[1];
 
+		// Iterative DFS
 		// Keep track of which students have traded with a stack
 		Stack<Integer> stack = new Stack<Integer>();
 		boolean[] visited = new boolean[graph.length];
@@ -113,12 +99,11 @@ public class trade {
 }
 
 class Student {
-	int id;											// No. of student
 	int sandwichType;						// Starting sandwich
 	ArrayList<Integer> accepts; // Willing to accept these sandwiches
 
-	public Student(int i, int s) {
-		this.id = i; this.sandwichType = s;
+	public Student(int s) {
+		this.sandwichType = s;
 		accepts = new ArrayList<Integer>();
 	}
 }
