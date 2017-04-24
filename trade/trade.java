@@ -1,9 +1,8 @@
-// Solution candidate (super messy) for Trade for COP 4516, Spring 2017
+// Solution candidate for Trade for COP 4516, Spring 2017
 
 import java.util.*;
 
 public class trade {
-	public static final boolean DEBUG = true;
 	public static Student[] students;
 	public static int[] sandwiches;
 
@@ -24,7 +23,6 @@ public class trade {
 				sandwiches[j] = value;
 			}
 
-			if (DEBUG) System.out.println("Sandwich values: " + Arrays.toString(sandwiches));
 
 			// Make a graph~!
 			students = new Student[n + 1];
@@ -49,125 +47,78 @@ public class trade {
 
 			int[][] matrix = new int[n + 1][n + 1];
 
+			ArrayList<Integer>[] graph = new ArrayList[n + 1];
+			for (int j = 0; j < graph.length; j++)
+				graph[j] = new ArrayList<Integer>();
+
 			// For each student...
 			for (int j = 0; j < matrix.length; j++) {
 				// Get all the sandwiches that they accept
-				if (DEBUG) System.out.printf("S_%d accepts %s\n", j, students[j].accepts);
 				for (int k = 0; k < students[j].accepts.size(); k++) {
 					// For all the sandwiches that they accept, see who has them to start
 					for (int l = 0; l < students.length; l++) {
 						// Does this student have the desired sandwich?
 						// If so, I can trade with them.
-						if (students[j].accepts.get(k) == students[l].sandwich) {
-							if (DEBUG) System.out.printf("S_%d has %d\n", l, students[l].sandwich);
+						if (l == j) continue; // skip self cycles
+						if (students[j].accepts.get(k) == students[l].sandwichType) {
 							matrix[l][j] = 1;
+							graph[l].add(j);
 						}
 					}
 				}
 			}
-			matrix[0][0] = 0;
-			for (int[] row : matrix)
-				if (DEBUG) System.out.println(Arrays.toString(row));
-
-
-			ArrayList<Integer>[] graph = new ArrayList[n + 1];
-			for (int j = 0; j < graph.length; j++)
-				graph[j] = new ArrayList<Integer>();
-
-			for (int j = 0; j < matrix.length; j++) {
-				for (int k = 0; k < matrix.length; k++) {
-					if (matrix[j][k] == 1) {
-						graph[k].add(j);
-					}
-				}
-			}
 
 
 
-			for (int j = 0; j < graph.length; j++) {
-				if (DEBUG) System.out.println("S_" + j + ": " +  (graph[j]));
-			}
 
-			if (DEBUG) System.out.println("=========================");
+			// for (int j = 0; j < matrix.length; j++) {
+			// 	for (int k = 0; k < matrix.length; k++) {
+			// 		if (matrix[j][k] == 1) {
+			// 			graph[j].add(k);
+			// 		}
+			// 	}
+			// }
 			System.out.println(DFS(graph, 0));
-			if (DEBUG) System.out.println("=========================");
-
 		}
 	}
 
+	// Try to connect each of the students by means of trading their sandwiches
 	public static int DFS(ArrayList<Integer>[] graph, int s) {
 		// s = start node, the PBn'J sandwich
+		 // Assume that the PBn'J is the best at first
+		int max = sandwiches[1];
 
-		int max = 1;
+		// Keep track of which students have traded with a stack
+		Stack<Integer> stack = new Stack<Integer>();
 		boolean[] visited = new boolean[graph.length];
 
-		Stack<Integer> stack = new Stack<Integer>();
-
+		// Start us off at the PBn'J
 		stack.push(s);
+		// So long as there is someone else that is willing to trade with the
+		// current student, try to make a trade
 		while(!stack.empty()) {
-			if (DEBUG) System.out.println("Stack: " + stack);
 			s = stack.pop();
 			if (!visited[s]) {
 				visited[s] = true;
-				// Get the greatest max
-				max = Math.max(max, sandwiches[students[s].sandwich]);
+				// Keep track of the more valuable sandwich thus far
+				max = Math.max(max, sandwiches[students[s].sandwichType]);
 			}
-
-			for (int i = 0; i < graph[s].size(); i++)
-				if (!visited[i]) {
-					stack.push(i);
-				}
+			// Get the next students that are willing to trade
+			for (Integer n : graph[s])
+				if (!visited[n])
+					stack.push(n);
 		}
 		return max;
 	}
 }
 
-class Sandwich {
-	int id;
-	int value;
-	boolean traded;
-	ArrayList<Integer> accepts;
-
-	public Sandwich(int i, int v) {
-		this.id = i; this.value = v;
-		traded = false;
-		accepts = new ArrayList<Integer>();
-	}
-
-	@Override
-	public String toString() {
-		// return this.id + "::" + this.value;
-		return
-		"{"+
-			"\n\tid:\t  " + this.id + ",\n" +
-			"\tvalue:\t  " + this.value + ",\n" +
-			"\ttraded:\t  " + traded + ",\n" +
-			"\taccepts: " + accepts.toString() + "\n" +
-		"}";
-	}
-}
-
 class Student {
-	int id;
-	int sandwich;
-	boolean traded;
-	ArrayList<Integer> accepts; // Will to accept these sandwiches
+	int id;											// No. of student
+	int sandwichType;						// Starting sandwich
+	ArrayList<Integer> accepts; // Willing to accept these sandwiches
 
 	public Student(int i, int s) {
-		this.id = i; this.sandwich = s;
-		traded = false;
+		this.id = i; this.sandwichType = s;
 		accepts = new ArrayList<Integer>();
-	}
-
-	@Override
-	public String toString() {
-		// return this.id + "::" + this.value;
-		return
-		"{"+
-			"\n\tid:\t  " + this.id + ",\n" +
-			"\ttype:\t  " + this.sandwich + ",\n" +
-			"\ttraded:\t  " + traded + ",\n" +
-			"\taccepts:  " + accepts.toString() + "\n" +
-		"}";
 	}
 }
