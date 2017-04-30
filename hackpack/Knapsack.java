@@ -5,6 +5,11 @@ Example Input
   long[] values = {1, 2, 3, 4, 5};
   long[] weights = {2, 6, 3, 5, 4};
 
+Example call
+
+Knapsack sack = new Knapsack(values, weights, capacity);
+long answer = sack.solve();
+
 */
 
 public class Knapsack {
