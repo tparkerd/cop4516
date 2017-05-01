@@ -71,10 +71,6 @@ class Vector3 {
   public double x, y, z;
   Point3 pt; // Some arbitrarily chosen point, so I picked first point provided
 
-  // NOTE(timp): In case I need to copy a vector
-  public Vector3(Vector3 v) {
-    this.x = v.x; this.y = v.y; this.z = v.z;
-  }
 
   public Vector3(double x, double y, double z) {
     this.x = x; this.y = y; this.z = z;
